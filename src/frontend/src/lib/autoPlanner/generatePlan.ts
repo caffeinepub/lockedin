@@ -8,26 +8,34 @@ export interface GeneratedPlan {
   milestones: Array<{ desc: string; dueDate?: string }>;
   weeklyTasks: Task[];
   dailyTasks: Task[];
+  durationDays?: number;
 }
 
-export function generatePlan(goalDescription: string, timeFrame: Type__1): GeneratedPlan {
+export function generatePlan(
+  goalDescription: string,
+  timeFrame: Type__1,
+  customDurationDays?: number
+): GeneratedPlan {
   const now = new Date();
   
   // Calculate timeframe duration in days
-  let durationDays = 90;
-  switch (timeFrame) {
-    case Type__1.days30:
-      durationDays = 30;
-      break;
-    case Type__1.days90:
-      durationDays = 90;
-      break;
-    case Type__1.months6to12:
-      durationDays = 270;
-      break;
-    case Type__1.years1to5:
-      durationDays = 730;
-      break;
+  let durationDays = customDurationDays || 90;
+  
+  if (!customDurationDays) {
+    switch (timeFrame) {
+      case Type__1.days30:
+        durationDays = 30;
+        break;
+      case Type__1.days90:
+        durationDays = 90;
+        break;
+      case Type__1.months6to12:
+        durationDays = 270;
+        break;
+      case Type__1.years1to5:
+        durationDays = 730;
+        break;
+    }
   }
 
   // Generate milestones with deadlines
@@ -64,5 +72,6 @@ export function generatePlan(goalDescription: string, timeFrame: Type__1): Gener
     milestones,
     weeklyTasks,
     dailyTasks,
+    durationDays: customDurationDays,
   };
 }

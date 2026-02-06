@@ -18,6 +18,7 @@ export interface DailyCheckIn {
 }
 export interface Goal {
   'id' : bigint,
+  'durationDays' : bigint,
   'createdAt' : bigint,
   'description' : string,
   'lockedIn' : boolean,
@@ -74,6 +75,11 @@ export interface _SERVICE {
   'addWeeklyTasks' : ActorMethod<[bigint, Array<Task>], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'createGoal' : ActorMethod<[string, Type__1, string], bigint>,
+  'createGoalWithCustomDuration' : ActorMethod<
+    [string, Type__1, string, bigint],
+    bigint
+  >,
+  'deleteGoal' : ActorMethod<[bigint], undefined>,
   'getAllUserData' : ActorMethod<[], Array<[Principal, UserDataView]>>,
   'getAllUserGoals' : ActorMethod<[], Array<[Principal, Array<Goal>]>>,
   'getAllWeeklyPlans' : ActorMethod<
@@ -86,6 +92,7 @@ export interface _SERVICE {
   'getDailyCheckInsByGoal' : ActorMethod<[bigint], Array<DailyCheckIn>>,
   'getDailyTasks' : ActorMethod<[bigint], Array<Task>>,
   'getGoal' : ActorMethod<[bigint], [] | [Goal]>,
+  'getGoalDuration' : ActorMethod<[bigint], [] | [bigint]>,
   'getGoals' : ActorMethod<[], Array<Goal>>,
   'getMilestones' : ActorMethod<[bigint], Array<Milestone>>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
@@ -94,6 +101,7 @@ export interface _SERVICE {
   'getWeeklyReviews' : ActorMethod<[], Array<WeeklyReview>>,
   'getWeeklyReviewsByGoal' : ActorMethod<[bigint], Array<WeeklyReview>>,
   'getWeeklyTasks' : ActorMethod<[bigint], Array<Task>>,
+  'goalExists' : ActorMethod<[bigint], boolean>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'isGoalLockedIn' : ActorMethod<[bigint], boolean>,
   'lockInGoal' : ActorMethod<[bigint], undefined>,

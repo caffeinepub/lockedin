@@ -100,6 +100,7 @@ export interface GoalProgress {
 }
 export interface Goal {
     id: bigint;
+    durationDays: bigint;
     createdAt: bigint;
     description: string;
     lockedIn: boolean;
@@ -165,6 +166,8 @@ export interface backendInterface {
     addWeeklyTasks(goalId: bigint, tasks: Array<Task>): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     createGoal(description: string, timeFrame: Type__1, motivation: string): Promise<bigint>;
+    createGoalWithCustomDuration(description: string, timeFrame: Type__1, motivation: string, durationDays: bigint): Promise<bigint>;
+    deleteGoal(goalId: bigint): Promise<void>;
     getAllUserData(): Promise<Array<[Principal, UserDataView]>>;
     getAllUserGoals(): Promise<Array<[Principal, Array<Goal>]>>;
     getAllWeeklyPlans(): Promise<Array<[Principal, Array<[bigint, WeeklyPlan]>]>>;
@@ -174,6 +177,7 @@ export interface backendInterface {
     getDailyCheckInsByGoal(goalId: bigint): Promise<Array<DailyCheckIn>>;
     getDailyTasks(goalId: bigint): Promise<Array<Task>>;
     getGoal(goalId: bigint): Promise<Goal | null>;
+    getGoalDuration(goalId: bigint): Promise<bigint | null>;
     getGoals(): Promise<Array<Goal>>;
     getMilestones(goalId: bigint): Promise<Array<Milestone>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
@@ -182,6 +186,7 @@ export interface backendInterface {
     getWeeklyReviews(): Promise<Array<WeeklyReview>>;
     getWeeklyReviewsByGoal(goalId: bigint): Promise<Array<WeeklyReview>>;
     getWeeklyTasks(goalId: bigint): Promise<Array<Task>>;
+    goalExists(goalId: bigint): Promise<boolean>;
     isCallerAdmin(): Promise<boolean>;
     isGoalLockedIn(goalId: bigint): Promise<boolean>;
     lockInGoal(goalId: bigint): Promise<void>;
@@ -275,6 +280,34 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.createGoal(arg0, to_candid_Type__1_n11(this._uploadFile, this._downloadFile, arg1), arg2);
+            return result;
+        }
+    }
+    async createGoalWithCustomDuration(arg0: string, arg1: Type__1, arg2: string, arg3: bigint): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.createGoalWithCustomDuration(arg0, to_candid_Type__1_n11(this._uploadFile, this._downloadFile, arg1), arg2, arg3);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.createGoalWithCustomDuration(arg0, to_candid_Type__1_n11(this._uploadFile, this._downloadFile, arg1), arg2, arg3);
+            return result;
+        }
+    }
+    async deleteGoal(arg0: bigint): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.deleteGoal(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.deleteGoal(arg0);
             return result;
         }
     }
@@ -404,6 +437,20 @@ export class Backend implements backendInterface {
             return from_candid_opt_n55(this._uploadFile, this._downloadFile, result);
         }
     }
+    async getGoalDuration(arg0: bigint): Promise<bigint | null> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getGoalDuration(arg0);
+                return from_candid_opt_n56(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getGoalDuration(arg0);
+            return from_candid_opt_n56(this._uploadFile, this._downloadFile, result);
+        }
+    }
     async getGoals(): Promise<Array<Goal>> {
         if (this.processError) {
             try {
@@ -450,28 +497,28 @@ export class Backend implements backendInterface {
         if (this.processError) {
             try {
                 const result = await this.actor.getWeeklyPlan(arg0);
-                return from_candid_opt_n56(this._uploadFile, this._downloadFile, result);
+                return from_candid_opt_n57(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getWeeklyPlan(arg0);
-            return from_candid_opt_n56(this._uploadFile, this._downloadFile, result);
+            return from_candid_opt_n57(this._uploadFile, this._downloadFile, result);
         }
     }
     async getWeeklyPlansByGoal(arg0: bigint): Promise<Array<WeeklyPlan>> {
         if (this.processError) {
             try {
                 const result = await this.actor.getWeeklyPlansByGoal(arg0);
-                return from_candid_vec_n57(this._uploadFile, this._downloadFile, result);
+                return from_candid_vec_n58(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getWeeklyPlansByGoal(arg0);
-            return from_candid_vec_n57(this._uploadFile, this._downloadFile, result);
+            return from_candid_vec_n58(this._uploadFile, this._downloadFile, result);
         }
     }
     async getWeeklyReviews(): Promise<Array<WeeklyReview>> {
@@ -514,6 +561,20 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.getWeeklyTasks(arg0);
             return from_candid_vec_n21(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async goalExists(arg0: bigint): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.goalExists(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.goalExists(arg0);
+            return result;
         }
     }
     async isCallerAdmin(): Promise<boolean> {
@@ -674,7 +735,10 @@ function from_candid_opt_n52(_uploadFile: (file: ExternalBlob) => Promise<Uint8A
 function from_candid_opt_n55(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Goal]): Goal | null {
     return value.length === 0 ? null : from_candid_Goal_n43(_uploadFile, _downloadFile, value[0]);
 }
-function from_candid_opt_n56(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_WeeklyPlan]): WeeklyPlan | null {
+function from_candid_opt_n56(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [bigint]): bigint | null {
+    return value.length === 0 ? null : value[0];
+}
+function from_candid_opt_n57(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_WeeklyPlan]): WeeklyPlan | null {
     return value.length === 0 ? null : from_candid_WeeklyPlan_n19(_uploadFile, _downloadFile, value[0]);
 }
 function from_candid_record_n16(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
@@ -796,6 +860,7 @@ function from_candid_record_n39(_uploadFile: (file: ExternalBlob) => Promise<Uin
 }
 function from_candid_record_n44(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     id: bigint;
+    durationDays: bigint;
     createdAt: bigint;
     description: string;
     lockedIn: boolean;
@@ -803,6 +868,7 @@ function from_candid_record_n44(_uploadFile: (file: ExternalBlob) => Promise<Uin
     timeFrame: _Type__1;
 }): {
     id: bigint;
+    durationDays: bigint;
     createdAt: bigint;
     description: string;
     lockedIn: boolean;
@@ -811,6 +877,7 @@ function from_candid_record_n44(_uploadFile: (file: ExternalBlob) => Promise<Uin
 } {
     return {
         id: value.id,
+        durationDays: value.durationDays,
         createdAt: value.createdAt,
         description: value.description,
         lockedIn: value.lockedIn,
@@ -920,7 +987,7 @@ function from_candid_vec_n49(_uploadFile: (file: ExternalBlob) => Promise<Uint8A
 function from_candid_vec_n50(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<[Principal, Array<[bigint, _WeeklyPlan]>]>): Array<[Principal, Array<[bigint, WeeklyPlan]>]> {
     return value.map((x)=>from_candid_tuple_n51(_uploadFile, _downloadFile, x));
 }
-function from_candid_vec_n57(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_WeeklyPlan>): Array<WeeklyPlan> {
+function from_candid_vec_n58(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_WeeklyPlan>): Array<WeeklyPlan> {
     return value.map((x)=>from_candid_WeeklyPlan_n19(_uploadFile, _downloadFile, x));
 }
 function to_candid_Milestone_n7(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Milestone): _Milestone {

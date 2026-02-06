@@ -4,11 +4,13 @@ import Array "mo:core/Array";
 import Runtime "mo:core/Runtime";
 import Principal "mo:core/Principal";
 import Time "mo:core/Time";
+import Iter "mo:core/Iter";
 
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
 
 
+// Specify the migration to run as part of upgrade using Motoko's with syntax
 
 actor {
   module TimeFrame {
@@ -35,6 +37,7 @@ actor {
     description : Text;
     timeFrame : TimeFrame.Type;
     motivation : Text;
+    durationDays : Nat; // Custom duration in days
     lockedIn : Bool;
     createdAt : Int;
   };
@@ -139,6 +142,7 @@ actor {
       description;
       timeFrame;
       motivation;
+      durationDays = 0; // Default to 0 for non-custom duration
       lockedIn = false;
       createdAt = getCurrentTimestamp();
     };
@@ -162,7 +166,11 @@ actor {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can access goals");
     };
-    getUserGoals(caller).goals.get(goalId);
+    let userGoals = getUserGoals(caller);
+    if (not userGoals.goals.containsKey(goalId)) {
+      Runtime.trap("Unauthorized: Goal does not belong to caller");
+    };
+    userGoals.goals.get(goalId);
   };
 
   public shared ({ caller }) func lockInGoal(goalId : Nat) : async () {
@@ -172,7 +180,7 @@ actor {
 
     let userGoals = getUserGoals(caller);
     switch (userGoals.goals.get(goalId)) {
-      case (null) { Runtime.trap("Goal not found") };
+      case (null) { Runtime.trap("Unauthorized: Goal does not belong to caller") };
       case (?goal) {
         let updatedGoal = { goal with lockedIn = true };
         userGoals.goals.add(goalId, updatedGoal);
@@ -188,7 +196,7 @@ actor {
 
     let userGoals = getUserGoals(caller);
     switch (userGoals.goals.get(goalId)) {
-      case (null) { Runtime.trap("Goal not found") };
+      case (null) { Runtime.trap("Unauthorized: Goal does not belong to caller") };
       case (?goal) { goal.lockedIn };
     };
   };
@@ -199,6 +207,10 @@ actor {
     };
 
     let userGoals = getUserGoals(caller);
+    if (not userGoals.goals.containsKey(goalId)) {
+      Runtime.trap("Unauthorized: Goal does not belong to caller");
+    };
+
     switch (userGoals.goalProgress.get(goalId)) {
       case (null) {
         let newProgress : GoalProgress = {
@@ -225,6 +237,10 @@ actor {
     };
 
     let userGoals = getUserGoals(caller);
+    if (not userGoals.goals.containsKey(goalId)) {
+      Runtime.trap("Unauthorized: Goal does not belong to caller");
+    };
+
     switch (userGoals.goalProgress.get(goalId)) {
       case (null) { [] };
       case (?progress) { progress.milestones };
@@ -237,6 +253,10 @@ actor {
     };
 
     let userGoals = getUserGoals(caller);
+    if (not userGoals.goals.containsKey(goalId)) {
+      Runtime.trap("Unauthorized: Goal does not belong to caller");
+    };
+
     switch (userGoals.goalProgress.get(goalId)) {
       case (null) {
         let newProgress : GoalProgress = {
@@ -263,6 +283,10 @@ actor {
     };
 
     let userGoals = getUserGoals(caller);
+    if (not userGoals.goals.containsKey(goalId)) {
+      Runtime.trap("Unauthorized: Goal does not belong to caller");
+    };
+
     switch (userGoals.goalProgress.get(goalId)) {
       case (null) { [] };
       case (?progress) { progress.weeklyTasks };
@@ -275,6 +299,10 @@ actor {
     };
 
     let userGoals = getUserGoals(caller);
+    if (not userGoals.goals.containsKey(goalId)) {
+      Runtime.trap("Unauthorized: Goal does not belong to caller");
+    };
+
     switch (userGoals.goalProgress.get(goalId)) {
       case (null) {
         let newProgress : GoalProgress = {
@@ -301,6 +329,10 @@ actor {
     };
 
     let userGoals = getUserGoals(caller);
+    if (not userGoals.goals.containsKey(goalId)) {
+      Runtime.trap("Unauthorized: Goal does not belong to caller");
+    };
+
     switch (userGoals.goalProgress.get(goalId)) {
       case (null) { [] };
       case (?progress) { progress.dailyTasks };
@@ -312,6 +344,11 @@ actor {
       Runtime.trap("Unauthorized: Only users can submit daily check-ins");
     };
 
+    let userGoals = getUserGoals(caller);
+    if (not userGoals.goals.containsKey(goalId)) {
+      Runtime.trap("Unauthorized: Goal does not belong to caller");
+    };
+
     let checkIn : DailyCheckIn = {
       goalId;
       date = getCurrentTimestamp();
@@ -319,7 +356,6 @@ actor {
       missedTasks;
     };
 
-    let userGoals = getUserGoals(caller);
     userGoals.dailyCheckIns.add(checkIn);
     userData.add(caller, userGoals);
   };
@@ -336,13 +372,23 @@ actor {
       Runtime.trap("Unauthorized: Only users can access daily check-ins");
     };
 
-    let checkIns = getUserGoals(caller).dailyCheckIns.toArray();
+    let userGoals = getUserGoals(caller);
+    if (not userGoals.goals.containsKey(goalId)) {
+      Runtime.trap("Unauthorized: Goal does not belong to caller");
+    };
+
+    let checkIns = userGoals.dailyCheckIns.toArray();
     checkIns.filter(func(checkIn) { checkIn.goalId == goalId });
   };
 
   public shared ({ caller }) func submitWeeklyReview(goalId : Nat, plannedTasks : [Task], completedTasks : [Task], progressSummary : Text) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can submit weekly reviews");
+    };
+
+    let userGoals = getUserGoals(caller);
+    if (not userGoals.goals.containsKey(goalId)) {
+      Runtime.trap("Unauthorized: Goal does not belong to caller");
     };
 
     let review : WeeklyReview = {
@@ -353,7 +399,6 @@ actor {
       progressSummary;
     };
 
-    let userGoals = getUserGoals(caller);
     userGoals.weeklyReviews.add(review);
     userData.add(caller, userGoals);
   };
@@ -370,7 +415,12 @@ actor {
       Runtime.trap("Unauthorized: Only users can access weekly reviews");
     };
 
-    let reviews = getUserGoals(caller).weeklyReviews.toArray();
+    let userGoals = getUserGoals(caller);
+    if (not userGoals.goals.containsKey(goalId)) {
+      Runtime.trap("Unauthorized: Goal does not belong to caller");
+    };
+
+    let reviews = userGoals.weeklyReviews.toArray();
     reviews.filter(func(review) { review.goalId == goalId });
   };
 
@@ -413,6 +463,91 @@ actor {
     );
   };
 
+  public shared ({ caller }) func submitWeeklyPlan(goalId : Nat, plannedTasks : [Task], progressSummary : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can submit weekly plans");
+    };
+
+    let userGoals = getUserGoals(caller);
+    if (not userGoals.goals.containsKey(goalId)) {
+      Runtime.trap("Unauthorized: Goal does not belong to caller");
+    };
+
+    let weeklyPlan : WeeklyPlan = {
+      plannedTasks;
+      completedTasks = [];
+      progressSummary;
+    };
+
+    userGoals.weeklyPlans.add(goalId, weeklyPlan);
+    userData.add(caller, userGoals);
+  };
+
+  public shared ({ caller }) func updateWeeklyPlanProgress(goalId : Nat, completedTasks : [Task]) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can update weekly plans");
+    };
+
+    let userGoals = getUserGoals(caller);
+    if (not userGoals.goals.containsKey(goalId)) {
+      Runtime.trap("Unauthorized: Goal does not belong to caller");
+    };
+
+    switch (userGoals.weeklyPlans.get(goalId)) {
+      case (null) { Runtime.trap("Weekly plan not found") };
+      case (?plan) {
+        let updatedPlan = {
+          plan with
+          completedTasks = completedTasks;
+        };
+        userGoals.weeklyPlans.add(goalId, updatedPlan);
+        userData.add(caller, userGoals);
+      };
+    };
+  };
+
+  public query ({ caller }) func getWeeklyPlan(goalId : Nat) : async ?WeeklyPlan {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can access weekly plans");
+    };
+
+    let userGoals = getUserGoals(caller);
+    if (not userGoals.goals.containsKey(goalId)) {
+      Runtime.trap("Unauthorized: Goal does not belong to caller");
+    };
+
+    userGoals.weeklyPlans.get(goalId);
+  };
+
+  public query ({ caller }) func getWeeklyPlansByGoal(goalId : Nat) : async [WeeklyPlan] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can access weekly plans");
+    };
+
+    let userGoals = getUserGoals(caller);
+    if (not userGoals.goals.containsKey(goalId)) {
+      Runtime.trap("Unauthorized: Goal does not belong to caller");
+    };
+
+    switch (userGoals.weeklyPlans.get(goalId)) {
+      case (null) { [] };
+      case (?plan) { [plan] };
+    };
+  };
+
+  public query ({ caller }) func getAllWeeklyPlans() : async [(Principal, [(Nat, WeeklyPlan)])] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can view all weekly plans");
+    };
+
+    let usersArray = userData.toArray();
+    usersArray.map<(Principal, UserData), (Principal, [(Nat, WeeklyPlan)])>(
+      func((principal, data)) {
+        (principal, data.weeklyPlans.toArray());
+      }
+    );
+  };
+
   func getCurrentTimestamp() : Int {
     Time.now();
   };
@@ -434,69 +569,89 @@ actor {
     };
   };
 
-  // New weekly plan endpoints
-  public shared ({ caller }) func submitWeeklyPlan(goalId : Nat, plannedTasks : [Task], progressSummary : Text) : async () {
+  public shared ({ caller }) func createGoalWithCustomDuration(description : Text, timeFrame : TimeFrame.Type, motivation : Text, durationDays : Nat) : async Nat {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can submit weekly plans");
+      Runtime.trap("Unauthorized: Only users can create goals");
     };
 
-    let weeklyPlan : WeeklyPlan = {
-      plannedTasks;
-      completedTasks = [];
-      progressSummary;
+    let goalId = nextGoalId;
+    nextGoalId += 1;
+
+    let newGoal : Goal = {
+      id = goalId;
+      description;
+      timeFrame;
+      motivation;
+      durationDays;
+      lockedIn = false;
+      createdAt = getCurrentTimestamp();
     };
 
     let userGoals = getUserGoals(caller);
-    userGoals.weeklyPlans.add(goalId, weeklyPlan);
+
+    userGoals.goals.add(goalId, newGoal);
+    userData.add(caller, userGoals);
+
+    goalId;
+  };
+
+  // New deleteGoal endpoint
+  public shared ({ caller }) func deleteGoal(goalId : Nat) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can delete goals");
+    };
+
+    let userGoals = getUserGoals(caller);
+
+    if (not userGoals.goals.containsKey(goalId)) {
+      Runtime.trap("Unauthorized: Goal does not belong to caller");
+    };
+
+    // Remove goal, progress, and weekly plans
+    userGoals.goals.remove(goalId);
+    userGoals.goalProgress.remove(goalId);
+    userGoals.weeklyPlans.remove(goalId);
+
+    // Filter out related daily check-ins and weekly reviews
+    let dailyCheckInsIter = userGoals.dailyCheckIns.values();
+    let filteredDailyCheckInsIter = dailyCheckInsIter.filter(func(checkIn) { checkIn.goalId != goalId });
+    userGoals.dailyCheckIns.clear();
+    for (checkIn in filteredDailyCheckInsIter) {
+      userGoals.dailyCheckIns.add(checkIn);
+    };
+
+    let weeklyReviewsIter = userGoals.weeklyReviews.values();
+    let filteredWeeklyReviewsIter = weeklyReviewsIter.filter(func(review) { review.goalId != goalId });
+    userGoals.weeklyReviews.clear();
+    for (review in filteredWeeklyReviewsIter) {
+      userGoals.weeklyReviews.add(review);
+    };
+
     userData.add(caller, userGoals);
   };
 
-  public shared ({ caller }) func updateWeeklyPlanProgress(goalId : Nat, completedTasks : [Task]) : async () {
+  // Helper query for checking goal existence (for frontend)
+  public query ({ caller }) func goalExists(goalId : Nat) : async Bool {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can update weekly plans");
+      Runtime.trap("Unauthorized: Only users can check goal existence");
     };
-
     let userGoals = getUserGoals(caller);
-    switch (userGoals.weeklyPlans.get(goalId)) {
-      case (null) { Runtime.trap("Weekly plan not found") };
-      case (?plan) {
-        let updatedPlan = {
-          plan with
-          completedTasks = completedTasks;
-        };
-        userGoals.weeklyPlans.add(goalId, updatedPlan);
-        userData.add(caller, userGoals);
-      };
-    };
+    userGoals.goals.containsKey(goalId);
   };
 
-  public query ({ caller }) func getWeeklyPlan(goalId : Nat) : async ?WeeklyPlan {
+  // Helper query for getting duration of a goal (for frontend)
+  public query ({ caller }) func getGoalDuration(goalId : Nat) : async ?Nat {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can access weekly plans");
+      Runtime.trap("Unauthorized: Only users can access goal duration");
     };
-    getUserGoals(caller).weeklyPlans.get(goalId);
-  };
-
-  public query ({ caller }) func getWeeklyPlansByGoal(goalId : Nat) : async [WeeklyPlan] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can access weekly plans");
+    let userGoals = getUserGoals(caller);
+    if (not userGoals.goals.containsKey(goalId)) {
+      Runtime.trap("Unauthorized: Goal does not belong to caller");
     };
-
-    let userPlans = getUserGoals(caller).weeklyPlans.values().toArray();
-    userPlans.filter(func(plan) { let _goalId = goalId; true });
-  };
-
-  public query ({ caller }) func getAllWeeklyPlans() : async [(Principal, [(Nat, WeeklyPlan)])] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can view all weekly plans");
+    switch (userGoals.goals.get(goalId)) {
+      case (null) { null };
+      case (?goal) { ?goal.durationDays };
     };
-
-    let usersArray = userData.toArray();
-    usersArray.map<(Principal, UserData), (Principal, [(Nat, WeeklyPlan)])>(
-      func((principal, data)) {
-        (principal, data.weeklyPlans.toArray());
-      }
-    );
   };
 };
 

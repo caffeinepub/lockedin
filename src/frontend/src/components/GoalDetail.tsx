@@ -5,25 +5,53 @@ import {
   useGetMilestones,
   useGetWeeklyTasks,
   useGetDailyTasks,
+  useDeleteGoal,
 } from '../hooks/useQueries';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckSquare, Calendar, TrendingUp, Lock } from 'lucide-react';
+import { CheckSquare, Calendar, TrendingUp, Lock, Trash2 } from 'lucide-react';
 import PlanningPhase from './PlanningPhase';
 import DailyCheckIn from './DailyCheckIn';
 import WeeklyReview from './WeeklyReview';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
 
 interface GoalDetailProps {
   goalId: bigint;
+  onDeleted?: () => void;
 }
 
-export default function GoalDetail({ goalId }: GoalDetailProps) {
+export default function GoalDetail({ goalId, onDeleted }: GoalDetailProps) {
   const { data: goal } = useGetGoal(goalId);
   const { data: isLocked } = useIsGoalLockedIn(goalId);
   const { data: milestones = [] } = useGetMilestones(goalId);
   const { data: weeklyTasks = [] } = useGetWeeklyTasks(goalId);
   const { data: dailyTasks = [] } = useGetDailyTasks(goalId);
   const [activeTab, setActiveTab] = useState('overview');
+  const deleteGoal = useDeleteGoal();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  const handleDelete = async () => {
+    try {
+      await deleteGoal.mutateAsync(goalId);
+      setIsDeleteDialogOpen(false);
+      if (onDeleted) {
+        onDeleted();
+      }
+    } catch (error) {
+      // Error is already handled by the mutation
+    }
+  };
 
   if (!goal) {
     return (
@@ -42,12 +70,42 @@ export default function GoalDetail({ goalId }: GoalDetailProps) {
               <CardTitle className="text-2xl mb-2">{goal.description}</CardTitle>
               <CardDescription>{goal.motivation}</CardDescription>
             </div>
-            {isLocked && (
-              <div className="flex items-center gap-2 text-brand">
-                <Lock className="h-5 w-5" />
-                <span className="text-sm font-medium">Locked In</span>
-              </div>
-            )}
+            <div className="flex items-center gap-3">
+              {isLocked && (
+                <div className="flex items-center gap-2 text-brand">
+                  <Lock className="h-5 w-5" />
+                  <span className="text-sm font-medium">Locked In</span>
+                </div>
+              )}
+              <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm">
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Goal
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Goal</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete this goal? This will permanently remove the
+                      goal and all associated data including milestones, tasks, check-ins, and
+                      reviews. This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDelete}
+                      disabled={deleteGoal.isPending}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      {deleteGoal.isPending ? 'Deleting...' : 'Delete'}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
           </div>
         </CardHeader>
       </Card>

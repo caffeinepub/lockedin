@@ -6,7 +6,14 @@ import { Separator } from '@/components/ui/separator';
 import { Plus, Trash2, Save, ArrowLeft, Calendar } from 'lucide-react';
 import type { GeneratedPlan } from '../../lib/autoPlanner/generatePlan';
 import type { Milestone, Task } from '../../backend';
-import { useCreateGoal, useAddMilestones, useAddWeeklyTasks, useAddDailyTasks, useLockInGoal } from '../../hooks/useQueries';
+import {
+  useCreateGoal,
+  useCreateGoalWithCustomDuration,
+  useAddMilestones,
+  useAddWeeklyTasks,
+  useAddDailyTasks,
+  useLockInGoal,
+} from '../../hooks/useQueries';
 import { toast } from 'sonner';
 
 interface AutoPlannerReviewProps {
@@ -31,6 +38,7 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
   );
 
   const createGoal = useCreateGoal();
+  const createGoalWithCustomDuration = useCreateGoalWithCustomDuration();
   const addMilestones = useAddMilestones();
   const addWeeklyTasks = useAddWeeklyTasks();
   const addDailyTasks = useAddDailyTasks();
@@ -42,12 +50,22 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
     setIsSaving(true);
 
     try {
-      // Create goal
-      const goalId = await createGoal.mutateAsync({
-        description: editedGoal,
-        timeFrame: plan.timeFrame,
-        motivation: plan.motivation,
-      });
+      // Create goal with or without custom duration
+      let goalId: bigint;
+      if (plan.durationDays) {
+        goalId = await createGoalWithCustomDuration.mutateAsync({
+          description: editedGoal,
+          timeFrame: plan.timeFrame,
+          motivation: plan.motivation,
+          durationDays: plan.durationDays,
+        });
+      } else {
+        goalId = await createGoal.mutateAsync({
+          description: editedGoal,
+          timeFrame: plan.timeFrame,
+          motivation: plan.motivation,
+        });
+      }
 
       // Add milestones with due dates
       const milestonesToAdd: Milestone[] = editedMilestones

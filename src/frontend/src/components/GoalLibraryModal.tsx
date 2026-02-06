@@ -57,6 +57,13 @@ export default function GoalLibraryModal({ onClose, onSkip }: GoalLibraryModalPr
     }
   };
 
+  const handleOpenChange = (open: boolean) => {
+    // Only close if open is false (user clicked overlay or pressed Escape)
+    if (!open) {
+      handleSkip();
+    }
+  };
+
   const getCategoryIcon = (categoryId: string) => {
     const category = categories.find((c) => c.id === categoryId);
     return category ? category.icon : Sparkles;
@@ -109,59 +116,67 @@ export default function GoalLibraryModal({ onClose, onSkip }: GoalLibraryModalPr
   };
 
   return (
-    <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] p-0">
-        <DialogHeader className="p-6 pb-4">
-          <DialogTitle className="text-2xl">Welcome to LockedIn! 🎯</DialogTitle>
-          <DialogDescription>
+    <Dialog open={true} onOpenChange={handleOpenChange}>
+      <DialogContent className="max-w-4xl w-[calc(100vw-2rem)] max-h-[90vh] flex flex-col p-0">
+        <DialogHeader className="p-4 sm:p-6 pb-3 sm:pb-4 shrink-0">
+          <DialogTitle className="text-xl sm:text-2xl">Welcome to LockedIn! 🎯</DialogTitle>
+          <DialogDescription className="text-sm sm:text-base">
             Choose from popular goals to get started quickly. Each goal comes with pre-defined milestones, tasks, and tracking metrics.
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="all" className="flex-1">
-          <div className="px-6">
-            <TabsList className="grid w-full grid-cols-6">
+        <Tabs defaultValue="all" className="flex-1 flex flex-col min-h-0">
+          <div className="px-4 sm:px-6 shrink-0">
+            <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 gap-1">
               {categories.map((category) => {
                 const Icon = category.icon;
                 return (
-                  <TabsTrigger key={category.id} value={category.id} className="gap-1">
-                    <Icon className="h-4 w-4" />
+                  <TabsTrigger key={category.id} value={category.id} className="gap-1 text-xs sm:text-sm px-2 sm:px-3">
+                    <Icon className="h-3 w-3 sm:h-4 sm:w-4" />
                     <span className="hidden sm:inline">{category.label}</span>
+                    <span className="sm:hidden">{category.label.slice(0, 4)}</span>
                   </TabsTrigger>
                 );
               })}
             </TabsList>
           </div>
 
-          <ScrollArea className="h-[400px] px-6 py-4">
-            {categories.map((category) => (
-              <TabsContent key={category.id} value={category.id} className="mt-0">
-                <div className="grid gap-4 md:grid-cols-2">
-                  {GOAL_TEMPLATES.filter(
-                    (t) => category.id === 'all' || t.category === category.id
-                  ).map(renderGoalCard)}
-                </div>
-              </TabsContent>
-            ))}
-          </ScrollArea>
+          <div className="flex-1 min-h-0 px-4 sm:px-6 py-3 sm:py-4">
+            <ScrollArea className="h-full">
+              {categories.map((category) => (
+                <TabsContent key={category.id} value={category.id} className="mt-0 h-full">
+                  <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2 pb-4">
+                    {GOAL_TEMPLATES.filter(
+                      (t) => category.id === 'all' || t.category === category.id
+                    ).map(renderGoalCard)}
+                  </div>
+                </TabsContent>
+              ))}
+            </ScrollArea>
+          </div>
         </Tabs>
 
-        <div className="p-6 pt-4 border-t flex items-center justify-between gap-4">
-          <p className="text-sm text-muted-foreground">
+        <div className="p-4 sm:p-6 pt-3 sm:pt-4 border-t flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 shrink-0">
+          <p className="text-xs sm:text-sm text-muted-foreground">
             {selectedGoals.size} {selectedGoals.size === 1 ? 'goal' : 'goals'} selected
           </p>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={handleSkip} disabled={createGoalFromTemplate.isPending}>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Button 
+              variant="outline" 
+              onClick={handleSkip} 
+              disabled={createGoalFromTemplate.isPending}
+              className="flex-1 sm:flex-none"
+            >
               Skip for now
             </Button>
             <Button
               onClick={handleAddGoals}
               disabled={selectedGoals.size === 0 || createGoalFromTemplate.isPending}
-              className="bg-brand hover:bg-brand/90 text-brand-foreground"
+              className="bg-brand hover:bg-brand/90 text-brand-foreground flex-1 sm:flex-none"
             >
               {createGoalFromTemplate.isPending
-                ? 'Adding goals...'
-                : `Add ${selectedGoals.size} ${selectedGoals.size === 1 ? 'Goal' : 'Goals'}`}
+                ? 'Adding...'
+                : `Add ${selectedGoals.size > 0 ? selectedGoals.size : ''} ${selectedGoals.size === 1 ? 'Goal' : 'Goals'}`}
             </Button>
           </div>
         </div>

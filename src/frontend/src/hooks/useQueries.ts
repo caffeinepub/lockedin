@@ -117,6 +117,40 @@ export function useCreateGoal() {
   });
 }
 
+export function useCreateGoalWithCustomDuration() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      description,
+      timeFrame,
+      motivation,
+      durationDays,
+    }: {
+      description: string;
+      timeFrame: Type__1;
+      motivation: string;
+      durationDays: number;
+    }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.createGoalWithCustomDuration(
+        description,
+        timeFrame,
+        motivation,
+        BigInt(durationDays)
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['goals'] });
+      toast.success("You're LockedIn.");
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to create goal: ${error.message}`);
+    },
+  });
+}
+
 export function useCreateGoalFromTemplate() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
@@ -154,6 +188,33 @@ export function useCreateGoalFromTemplate() {
     },
     onError: (error: Error) => {
       toast.error(`Failed to create goal: ${error.message}`);
+    },
+  });
+}
+
+export function useDeleteGoal() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (goalId: bigint) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.deleteGoal(goalId);
+    },
+    onSuccess: (_, goalId) => {
+      // Invalidate all goal-related queries
+      queryClient.invalidateQueries({ queryKey: ['goals'] });
+      queryClient.invalidateQueries({ queryKey: ['goal', goalId.toString()] });
+      queryClient.invalidateQueries({ queryKey: ['milestones', goalId.toString()] });
+      queryClient.invalidateQueries({ queryKey: ['weeklyTasks', goalId.toString()] });
+      queryClient.invalidateQueries({ queryKey: ['dailyTasks', goalId.toString()] });
+      queryClient.invalidateQueries({ queryKey: ['dailyCheckIns', goalId.toString()] });
+      queryClient.invalidateQueries({ queryKey: ['weeklyReviews', goalId.toString()] });
+      queryClient.invalidateQueries({ queryKey: ['goalLockedIn', goalId.toString()] });
+      toast.success('Goal deleted successfully');
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to delete goal: ${error.message}`);
     },
   });
 }

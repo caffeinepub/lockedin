@@ -18,6 +18,7 @@ export interface GoalProgress {
 }
 export interface Goal {
     id: bigint;
+    durationDays: bigint;
     createdAt: bigint;
     description: string;
     lockedIn: boolean;
@@ -82,6 +83,8 @@ export interface backendInterface {
     addWeeklyTasks(goalId: bigint, tasks: Array<Task>): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     createGoal(description: string, timeFrame: Type__1, motivation: string): Promise<bigint>;
+    createGoalWithCustomDuration(description: string, timeFrame: Type__1, motivation: string, durationDays: bigint): Promise<bigint>;
+    deleteGoal(goalId: bigint): Promise<void>;
     getAllUserData(): Promise<Array<[Principal, UserDataView]>>;
     getAllUserGoals(): Promise<Array<[Principal, Array<Goal>]>>;
     getAllWeeklyPlans(): Promise<Array<[Principal, Array<[bigint, WeeklyPlan]>]>>;
@@ -91,6 +94,7 @@ export interface backendInterface {
     getDailyCheckInsByGoal(goalId: bigint): Promise<Array<DailyCheckIn>>;
     getDailyTasks(goalId: bigint): Promise<Array<Task>>;
     getGoal(goalId: bigint): Promise<Goal | null>;
+    getGoalDuration(goalId: bigint): Promise<bigint | null>;
     getGoals(): Promise<Array<Goal>>;
     getMilestones(goalId: bigint): Promise<Array<Milestone>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
@@ -99,6 +103,7 @@ export interface backendInterface {
     getWeeklyReviews(): Promise<Array<WeeklyReview>>;
     getWeeklyReviewsByGoal(goalId: bigint): Promise<Array<WeeklyReview>>;
     getWeeklyTasks(goalId: bigint): Promise<Array<Task>>;
+    goalExists(goalId: bigint): Promise<boolean>;
     isCallerAdmin(): Promise<boolean>;
     isGoalLockedIn(goalId: bigint): Promise<boolean>;
     lockInGoal(goalId: bigint): Promise<void>;

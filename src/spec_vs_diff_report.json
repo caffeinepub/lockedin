@@ -1,53 +1,62 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-06T14:02:29.246Z",
-  "summary": "BuildRequest specified no requirements or acceptance criteria, but the diff shows substantial implementation work across backend and frontend (goal planning data model, access control, profile/goal APIs, and UI components for planning and auto-planning).",
-  "missing_requirements": [],
+  "generatedAt": "2026-02-06T23:05:56.941Z",
+  "summary": "Diff updates GoalLibraryModal with an onOpenChange handler that closes on overlay/Escape via handleSkip, and updates Header with a clickable logo button that sets dashboard section to 'home' when authenticated and scrolls to top when unauthenticated. The diff also modifies metadata/state summary files that describe additional unrelated features not requested.",
+  "missing_requirements": [
+    {
+      "id": "REQ-1",
+      "requirement": "Fix the non-working cancel/close behavior on the “Welcome to LockedIn!” goal library popup so the user can reliably dismiss it without selecting or adding any goals.",
+      "reason": "The diff shows logic to close when the dialog open state changes to false (overlay click/Escape), but the truncated diff does not show an explicit cancel/close control in the modal UI wired to handleSkip/onClose, nor evidence that the dialog component is actually receiving handleOpenChange as its onOpenChange prop.",
+      "evidence": [
+        "frontend/src/components/GoalLibraryModal.tsx"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "requirement": "Update the “Welcome to LockedIn!” goal library popup layout and sizing to be mobile-responsive so it fits effectively on small screens.",
+      "reason": "The diff snippet shows imports (e.g., ScrollArea) but the relevant responsive layout/styling changes (viewport sizing, scroll behavior for list vs. bottom action area, mobile usability of tabs) are not visible in the truncated portion, so there is insufficient evidence that the acceptance criteria are implemented.",
+      "evidence": [
+        "frontend/src/components/GoalLibraryModal.tsx"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "requirement": "Make the top-left app logo in the header always function as a “go to homepage” control for both authenticated and unauthenticated users.",
+      "reason": "Authenticated behavior appears to be implemented via setActiveSection('home'), but unauthenticated behavior only scrolls the current page to the top rather than navigating to the public HomePage view. If the user is unauthenticated and not already on HomePage, this would not satisfy the requirement as written.",
+      "evidence": [
+        "frontend/src/components/Header.tsx"
+      ]
+    }
+  ],
   "hallucinated_features": [
     {
-      "description": "Backend implementation of goal planning domain model and user data structures (goals, milestones, tasks, daily check-ins, weekly reviews/plans) with persistence maps and goal ID generation.",
-      "reason": "No requirements were provided in the BuildRequest, yet significant new backend functionality appears to be implemented/modified.",
+      "description": "Added goal deletion support and custom goal duration creation mutations (useDeleteGoal, useCreateGoalWithCustomDuration).",
+      "reason": "These features are described in the updated frontend-file-summaries.txt but were not requested in the BuildRequest and are not part of the stated non-goals.",
       "evidence": [
-        "backend/main.mo"
-      ]
-    },
-    {
-      "description": "Authorization/access-control enforcement for profile and goal operations (permission checks, admin checks, traps on unauthorized).",
-      "reason": "Not requested (BuildRequest has no requirements), but diff shows access control integration and permission checks.",
-      "evidence": [
-        "backend/main.mo"
-      ]
-    },
-    {
-      "description": "Frontend AutoPlanner goal picker UI with goal templates, simulated generation delay, and plan generation logic wired to a callback.",
-      "reason": "Not requested by BuildRequest; new/modified UI and plan generation behavior is shown.",
-      "evidence": [
-        "frontend/src/components/AutoPlanner/AutoPlannerGoalPicker.tsx"
-      ]
-    },
-    {
-      "description": "Frontend multi-step Planning Phase flow (milestones → weekly tasks → daily tasks → review) including mutations/queries and lock-in behavior.",
-      "reason": "Not requested by BuildRequest; diff shows a full planning workflow implementation.",
-      "evidence": [
-        "frontend/src/components/PlanningPhase.tsx",
         "frontend-file-summaries.txt"
       ]
     },
     {
-      "description": "Project state updated/contains a pending fix request about 'Generate Plan' button styling inconsistency.",
-      "reason": "BuildRequest contains no requirements; additionally, this appears as a separate tracked request in project_state rather than a stated BuildRequest requirement.",
+      "description": "Dashboard behavior changes related to goal deletion (handleGoalDeleted) and GoalDetail delete button with confirmation dialog.",
+      "reason": "These are described in frontend-file-summaries.txt but are outside the requested scope (welcome popup cancel/mobile + header logo home behavior).",
       "evidence": [
-        "project_state.json"
+        "frontend-file-summaries.txt"
+      ]
+    },
+    {
+      "description": "Broad UI/branding/style changes across many pages/components (HomePage hero/features, DashboardHome navigation cards, global OKLCH theme tokens, tailwind config semantic tokens, etc.).",
+      "reason": "These are described as changed in frontend-file-summaries.txt but were not requested and some conflict with the non-goal of not redesigning broader navigation/pages.",
+      "evidence": [
+        "frontend-file-summaries.txt"
       ]
     }
   ],
-  "confidence": 0.78,
+  "confidence": 0.56,
   "changed_files": [
-    "backend/main.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/AutoPlanner/AutoPlannerGoalPicker.tsx",
-    "frontend/src/components/PlanningPhase.tsx",
+    "frontend/src/components/GoalLibraryModal.tsx",
+    "frontend/src/components/Header.tsx",
     "project_state.json"
   ]
 }

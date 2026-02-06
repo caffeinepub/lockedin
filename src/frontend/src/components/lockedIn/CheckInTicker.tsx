@@ -1,4 +1,4 @@
-import { useGetDailyCheckInsByGoal } from '../../hooks/useQueries';
+import { useGetDailyCheckInsByGoal, useGetGoal } from '../../hooks/useQueries';
 import { computeCheckInStats } from '../../utils/trackingMetrics';
 import { CheckCircle2, XCircle, Circle } from 'lucide-react';
 
@@ -7,9 +7,10 @@ interface CheckInTickerProps {
 }
 
 export default function CheckInTicker({ goalId }: CheckInTickerProps) {
-  const { data: checkIns = [], isLoading } = useGetDailyCheckInsByGoal(goalId);
+  const { data: checkIns = [], isLoading: checkInsLoading } = useGetDailyCheckInsByGoal(goalId);
+  const { data: goal, isLoading: goalLoading } = useGetGoal(goalId);
 
-  if (isLoading) {
+  if (checkInsLoading || goalLoading) {
     return (
       <div className="space-y-2">
         <p className="text-sm text-muted-foreground">Loading check-ins...</p>
@@ -17,7 +18,8 @@ export default function CheckInTicker({ goalId }: CheckInTickerProps) {
     );
   }
 
-  const stats = computeCheckInStats(checkIns);
+  const stats = computeCheckInStats(checkIns, goal?.createdAt);
+  const daysShown = stats.last7Days.length;
 
   return (
     <div className="space-y-3">
@@ -55,7 +57,7 @@ export default function CheckInTicker({ goalId }: CheckInTickerProps) {
         })}
       </div>
       <div className="text-xs text-muted-foreground space-y-1">
-        <p>Last 7 days • {stats.checkInCount} check-ins</p>
+        <p>Last {daysShown} {daysShown === 1 ? 'day' : 'days'} • {stats.checkInCount} check-ins</p>
         {stats.checkInCount > 0 && (
           <p>Completion rate: {Math.round(stats.completionRate * 100)}%</p>
         )}

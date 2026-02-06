@@ -60,6 +60,7 @@ export const GoalProgress = IDL.Record({
 });
 export const Goal = IDL.Record({
   'id' : IDL.Nat,
+  'durationDays' : IDL.Nat,
   'createdAt' : IDL.Int,
   'description' : IDL.Text,
   'lockedIn' : IDL.Bool,
@@ -85,6 +86,12 @@ export const idlService = IDL.Service({
   'addWeeklyTasks' : IDL.Func([IDL.Nat, IDL.Vec(Task)], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'createGoal' : IDL.Func([IDL.Text, Type__1, IDL.Text], [IDL.Nat], []),
+  'createGoalWithCustomDuration' : IDL.Func(
+      [IDL.Text, Type__1, IDL.Text, IDL.Nat],
+      [IDL.Nat],
+      [],
+    ),
+  'deleteGoal' : IDL.Func([IDL.Nat], [], []),
   'getAllUserData' : IDL.Func(
       [],
       [IDL.Vec(IDL.Tuple(IDL.Principal, UserDataView))],
@@ -114,6 +121,7 @@ export const idlService = IDL.Service({
     ),
   'getDailyTasks' : IDL.Func([IDL.Nat], [IDL.Vec(Task)], ['query']),
   'getGoal' : IDL.Func([IDL.Nat], [IDL.Opt(Goal)], ['query']),
+  'getGoalDuration' : IDL.Func([IDL.Nat], [IDL.Opt(IDL.Nat)], ['query']),
   'getGoals' : IDL.Func([], [IDL.Vec(Goal)], ['query']),
   'getMilestones' : IDL.Func([IDL.Nat], [IDL.Vec(Milestone)], ['query']),
   'getUserProfile' : IDL.Func(
@@ -134,6 +142,7 @@ export const idlService = IDL.Service({
       ['query'],
     ),
   'getWeeklyTasks' : IDL.Func([IDL.Nat], [IDL.Vec(Task)], ['query']),
+  'goalExists' : IDL.Func([IDL.Nat], [IDL.Bool], ['query']),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'isGoalLockedIn' : IDL.Func([IDL.Nat], [IDL.Bool], ['query']),
   'lockInGoal' : IDL.Func([IDL.Nat], [], []),
@@ -207,6 +216,7 @@ export const idlFactory = ({ IDL }) => {
   });
   const Goal = IDL.Record({
     'id' : IDL.Nat,
+    'durationDays' : IDL.Nat,
     'createdAt' : IDL.Int,
     'description' : IDL.Text,
     'lockedIn' : IDL.Bool,
@@ -229,6 +239,12 @@ export const idlFactory = ({ IDL }) => {
     'addWeeklyTasks' : IDL.Func([IDL.Nat, IDL.Vec(Task)], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'createGoal' : IDL.Func([IDL.Text, Type__1, IDL.Text], [IDL.Nat], []),
+    'createGoalWithCustomDuration' : IDL.Func(
+        [IDL.Text, Type__1, IDL.Text, IDL.Nat],
+        [IDL.Nat],
+        [],
+      ),
+    'deleteGoal' : IDL.Func([IDL.Nat], [], []),
     'getAllUserData' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(IDL.Principal, UserDataView))],
@@ -258,6 +274,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'getDailyTasks' : IDL.Func([IDL.Nat], [IDL.Vec(Task)], ['query']),
     'getGoal' : IDL.Func([IDL.Nat], [IDL.Opt(Goal)], ['query']),
+    'getGoalDuration' : IDL.Func([IDL.Nat], [IDL.Opt(IDL.Nat)], ['query']),
     'getGoals' : IDL.Func([], [IDL.Vec(Goal)], ['query']),
     'getMilestones' : IDL.Func([IDL.Nat], [IDL.Vec(Milestone)], ['query']),
     'getUserProfile' : IDL.Func(
@@ -278,6 +295,7 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'getWeeklyTasks' : IDL.Func([IDL.Nat], [IDL.Vec(Task)], ['query']),
+    'goalExists' : IDL.Func([IDL.Nat], [IDL.Bool], ['query']),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'isGoalLockedIn' : IDL.Func([IDL.Nat], [IDL.Bool], ['query']),
     'lockInGoal' : IDL.Func([IDL.Nat], [], []),

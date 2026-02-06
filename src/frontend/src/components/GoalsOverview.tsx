@@ -16,8 +16,15 @@ export default function GoalsOverview({ onSelectGoal }: GoalsOverviewProps) {
   const [showCreateGoal, setShowCreateGoal] = useState(false);
   const [showGoalLibrary, setShowGoalLibrary] = useState(false);
 
-  const getTimeFrameLabel = (timeFrame: string) => {
-    switch (timeFrame) {
+  const getTimeFrameLabel = (goal: any) => {
+    // If custom duration exists and is non-zero, use it
+    if (goal.durationDays && Number(goal.durationDays) > 0) {
+      const days = Number(goal.durationDays);
+      return `${days} ${days === 1 ? 'Day' : 'Days'}`;
+    }
+
+    // Otherwise use the timeFrame enum
+    switch (goal.timeFrame) {
       case 'days30':
         return '30 Days';
       case 'days90':
@@ -27,7 +34,7 @@ export default function GoalsOverview({ onSelectGoal }: GoalsOverviewProps) {
       case 'years1to5':
         return '1-5 Years';
       default:
-        return timeFrame;
+        return 'Custom';
     }
   };
 
@@ -52,77 +59,64 @@ export default function GoalsOverview({ onSelectGoal }: GoalsOverviewProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <p className="text-muted-foreground">
-            {goals.length === 0
-              ? 'No goals yet. Create your first goal to get started.'
-              : `You have ${goals.length} active ${goals.length === 1 ? 'goal' : 'goals'}`}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={() => setShowGoalLibrary(true)} variant="outline" className="gap-2">
-            <Library className="h-4 w-4" />
-            Goal Library
-          </Button>
-          <Button onClick={() => setShowCreateGoal(true)} className="gap-2 bg-brand hover:bg-brand/90 text-brand-foreground">
-            <Plus className="h-4 w-4" />
-            New Goal
-          </Button>
-        </div>
+      <div className="flex gap-3">
+        <Button
+          onClick={() => setShowCreateGoal(true)}
+          className="bg-brand hover:bg-brand/90 text-brand-foreground"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Create Goal
+        </Button>
+        <Button onClick={() => setShowGoalLibrary(true)} variant="outline">
+          <Library className="h-4 w-4 mr-2" />
+          Goal Library
+        </Button>
       </div>
 
       {goals.length === 0 ? (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <Target className="h-12 w-12 text-muted-foreground mb-4" />
+        <Card>
+          <CardContent className="py-12 text-center">
+            <Target className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
             <h3 className="text-lg font-semibold mb-2">No goals yet</h3>
-            <p className="text-muted-foreground text-center mb-6 max-w-md">
-              Start your journey by creating your first goal. Whether it's launching a product,
-              growing your business, or achieving a personal milestone - we'll help you break it
-              down and track your progress.
+            <p className="text-muted-foreground mb-6">
+              Create your first goal to start tracking your progress
             </p>
-            <div className="flex gap-3">
-              <Button onClick={() => setShowGoalLibrary(true)} variant="outline" className="gap-2">
-                <Library className="h-4 w-4" />
-                Browse Goal Library
-              </Button>
-              <Button onClick={() => setShowCreateGoal(true)} className="gap-2 bg-brand hover:bg-brand/90 text-brand-foreground">
-                <Plus className="h-4 w-4" />
-                Create Custom Goal
-              </Button>
-            </div>
+            <Button
+              onClick={() => setShowCreateGoal(true)}
+              className="bg-brand hover:bg-brand/90 text-brand-foreground"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Create Your First Goal
+            </Button>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {goals.map((goal) => (
             <Card
               key={goal.id.toString()}
-              className="hover:shadow-lg hover:border-brand/30 transition-all cursor-pointer"
+              className="cursor-pointer transition-all hover:shadow-md hover:border-brand/40"
               onClick={() => onSelectGoal(goal.id)}
             >
               <CardHeader>
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <CardTitle className="text-xl mb-2">{goal.description}</CardTitle>
-                    <CardDescription className="line-clamp-2">{goal.motivation}</CardDescription>
-                  </div>
+                <div className="flex items-start justify-between">
+                  <CardTitle className="text-lg line-clamp-2">{goal.description}</CardTitle>
                   {goal.lockedIn && (
-                    <Lock className="h-5 w-5 text-brand shrink-0" />
+                    <Lock className="h-5 w-5 text-brand shrink-0 ml-2" />
                   )}
                 </div>
+                <CardDescription className="line-clamp-2">{goal.motivation}</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center gap-4 text-sm">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Calendar className="h-4 w-4" />
-                    <span>{getTimeFrameLabel(goal.timeFrame)}</span>
-                  </div>
-                  <Badge variant={goal.lockedIn ? 'default' : 'outline'} className={goal.lockedIn ? 'bg-brand/10 text-brand border-brand/20' : ''}>
-                    {goal.lockedIn ? 'Locked In' : 'Planning'}
-                  </Badge>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Calendar className="h-4 w-4" />
+                  <span>{getTimeFrameLabel(goal)}</span>
                 </div>
+                {goal.lockedIn && (
+                  <Badge variant="secondary" className="mt-3">
+                    Locked In
+                  </Badge>
+                )}
               </CardContent>
             </Card>
           ))}
@@ -130,7 +124,10 @@ export default function GoalsOverview({ onSelectGoal }: GoalsOverviewProps) {
       )}
 
       {showGoalLibrary && (
-        <GoalLibraryModal onClose={() => setShowGoalLibrary(false)} />
+        <GoalLibraryModal
+          onClose={() => setShowGoalLibrary(false)}
+          onSkip={() => setShowGoalLibrary(false)}
+        />
       )}
     </div>
   );

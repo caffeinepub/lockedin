@@ -59,6 +59,16 @@ export default function Header({ onOpenProfile }: HeaderProps) {
     setActiveSection('settings');
   };
 
+  const handleLogoClick = () => {
+    if (isAuthenticated) {
+      // Navigate to dashboard home
+      setActiveSection('home');
+    } else {
+      // Already on HomePage, scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   // Determine display name and avatar for authenticated users
   const displayName = profileLoading ? 'Loading...' : userProfile?.name || 'Account';
   const displayAvatar = userProfile?.avatar || '🎯';
@@ -71,11 +81,17 @@ export default function Header({ onOpenProfile }: HeaderProps) {
     <header className="border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <img
-            src="/assets/logoo-removebg-preview.png"
-            alt="LockedIn"
-            className="h-14 w-auto"
-          />
+          <button
+            onClick={handleLogoClick}
+            className="focus:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-lg transition-transform hover:scale-105 active:scale-95"
+            aria-label="Go to home"
+          >
+            <img
+              src="/assets/logoo-removebg-preview.png"
+              alt="LockedIn"
+              className="h-14 w-auto"
+            />
+          </button>
         </div>
         <div className="flex items-center gap-3">
           <DropdownMenu>

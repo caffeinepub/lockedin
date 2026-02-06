@@ -16,6 +16,7 @@ interface AutoPlannerGoalPickerProps {
 export default function AutoPlannerGoalPicker({ onPlanGenerated }: AutoPlannerGoalPickerProps) {
   const [goalInput, setGoalInput] = useState('');
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
+  const [durationDays, setDurationDays] = useState<string>('90');
   const [isGenerating, setIsGenerating] = useState(false);
 
   const handleGenerate = () => {
@@ -24,16 +25,17 @@ export default function AutoPlannerGoalPicker({ onPlanGenerated }: AutoPlannerGo
     // Simulate generation delay for better UX
     setTimeout(() => {
       let plan: GeneratedPlan;
+      const duration = parseInt(durationDays, 10);
 
       if (selectedTemplate) {
         const template = GOAL_TEMPLATES.find((t) => t.id === selectedTemplate);
         if (template) {
-          plan = generatePlan(template.title, template.timeFrame);
+          plan = generatePlan(template.title, template.timeFrame, duration);
         } else {
-          plan = generatePlan(goalInput || 'My Goal', Type__1.days90);
+          plan = generatePlan(goalInput || 'My Goal', Type__1.days90, duration);
         }
       } else {
-        plan = generatePlan(goalInput || 'My Goal', Type__1.days90);
+        plan = generatePlan(goalInput || 'My Goal', Type__1.days90, duration);
       }
 
       setIsGenerating(false);
@@ -41,7 +43,9 @@ export default function AutoPlannerGoalPicker({ onPlanGenerated }: AutoPlannerGo
     }, 800);
   };
 
-  const canGenerate = goalInput.trim().length > 0 || selectedTemplate.length > 0;
+  const canGenerate = (goalInput.trim().length > 0 || selectedTemplate.length > 0) && 
+                       parseInt(durationDays, 10) > 0 && 
+                       parseInt(durationDays, 10) <= 1825;
 
   return (
     <div className="space-y-6">
@@ -90,6 +94,22 @@ export default function AutoPlannerGoalPicker({ onPlanGenerated }: AutoPlannerGo
             ))}
           </SelectContent>
         </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="duration-input">Duration (Days)</Label>
+        <Input
+          id="duration-input"
+          type="number"
+          min="1"
+          max="1825"
+          placeholder="e.g., 90"
+          value={durationDays}
+          onChange={(e) => setDurationDays(e.target.value)}
+        />
+        <p className="text-xs text-muted-foreground">
+          Choose a duration between 1 and 1825 days (about 5 years)
+        </p>
       </div>
 
       <Button

@@ -41,6 +41,11 @@ export default function Dashboard() {
     setActiveSection('milestones');
   };
 
+  const handleGoalDeleted = () => {
+    setSelectedGoalId(null);
+    setActiveSection('goals');
+  };
+
   const MenuContent = () => (
     <nav className="space-y-2">
       {menuItems.map((item) => {
@@ -134,7 +139,7 @@ export default function Dashboard() {
             )}
 
             {activeSection === 'milestones' && selectedGoalId && (
-              <GoalDetail goalId={selectedGoalId} />
+              <GoalDetail goalId={selectedGoalId} onDeleted={handleGoalDeleted} />
             )}
 
             {activeSection === 'milestones' && !selectedGoalId && (
