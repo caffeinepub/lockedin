@@ -1,0 +1,53 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-06T14:02:29.246Z",
+  "summary": "BuildRequest specified no requirements or acceptance criteria, but the diff shows substantial implementation work across backend and frontend (goal planning data model, access control, profile/goal APIs, and UI components for planning and auto-planning).",
+  "missing_requirements": [],
+  "hallucinated_features": [
+    {
+      "description": "Backend implementation of goal planning domain model and user data structures (goals, milestones, tasks, daily check-ins, weekly reviews/plans) with persistence maps and goal ID generation.",
+      "reason": "No requirements were provided in the BuildRequest, yet significant new backend functionality appears to be implemented/modified.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "description": "Authorization/access-control enforcement for profile and goal operations (permission checks, admin checks, traps on unauthorized).",
+      "reason": "Not requested (BuildRequest has no requirements), but diff shows access control integration and permission checks.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "description": "Frontend AutoPlanner goal picker UI with goal templates, simulated generation delay, and plan generation logic wired to a callback.",
+      "reason": "Not requested by BuildRequest; new/modified UI and plan generation behavior is shown.",
+      "evidence": [
+        "frontend/src/components/AutoPlanner/AutoPlannerGoalPicker.tsx"
+      ]
+    },
+    {
+      "description": "Frontend multi-step Planning Phase flow (milestones → weekly tasks → daily tasks → review) including mutations/queries and lock-in behavior.",
+      "reason": "Not requested by BuildRequest; diff shows a full planning workflow implementation.",
+      "evidence": [
+        "frontend/src/components/PlanningPhase.tsx",
+        "frontend-file-summaries.txt"
+      ]
+    },
+    {
+      "description": "Project state updated/contains a pending fix request about 'Generate Plan' button styling inconsistency.",
+      "reason": "BuildRequest contains no requirements; additionally, this appears as a separate tracked request in project_state rather than a stated BuildRequest requirement.",
+      "evidence": [
+        "project_state.json"
+      ]
+    }
+  ],
+  "confidence": 0.78,
+  "changed_files": [
+    "backend/main.mo",
+    "frontend-file-summaries.txt",
+    "frontend/src/components/AutoPlanner/AutoPlannerGoalPicker.tsx",
+    "frontend/src/components/PlanningPhase.tsx",
+    "project_state.json"
+  ]
+}

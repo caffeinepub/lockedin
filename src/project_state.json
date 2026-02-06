@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "New project",
+  "architectural_notes": [],
+  "known_issues": [
+    "UI: 'Generate Plan' button styling/color does not match other primary buttons (e.g., 'Proceed'); needs consistency check across all buttons"
+  ],
+  "isFixRequest": true,
+  "existing_features": [],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Fix UI inconsistency: 'Generate Plan' button styling not as colorful as other primary buttons (e.g., 'Proceed'); cross-check and align styling across all buttons",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "projectName": "Untitled request",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

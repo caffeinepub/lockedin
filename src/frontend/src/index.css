@@ -1,0 +1,155 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --radius: 0.625rem;
+        --background: 0.985 0 0;
+        --foreground: 0.145 0 0;
+        --card: 0.98 0 0;
+        --card-foreground: 0.145 0 0;
+        --popover: 0.98 0 0;
+        --popover-foreground: 0.145 0 0;
+        --primary: 0.145 0 0;
+        --primary-foreground: 0.985 0 0;
+        --secondary: 0.922 0 0;
+        --secondary-foreground: 0.145 0 0;
+        --muted: 0.922 0 0;
+        --muted-foreground: 0.556 0 0;
+        --accent: 0.922 0 0;
+        --accent-foreground: 0.145 0 0;
+        --destructive: 0.704 0.191 22.216;
+        --destructive-foreground: 0.985 0 0;
+        --border: 0 0 0 / 10%;
+        --input: 0 0 0 / 15%;
+        --ring: 0.72 0.15 60;
+        --chart-1: 0.488 0.243 264.376;
+        --chart-2: 0.696 0.17 162.48;
+        --chart-3: 0.769 0.188 70.08;
+        --chart-4: 0.627 0.265 303.9;
+        --chart-5: 0.645 0.246 16.439;
+        --sidebar: 0.98 0 0;
+        --sidebar-foreground: 0.145 0 0;
+        --sidebar-primary: 0.488 0.243 264.376;
+        --sidebar-primary-foreground: 0.985 0 0;
+        --sidebar-accent: 0.922 0 0;
+        --sidebar-accent-foreground: 0.145 0 0;
+        --sidebar-border: 0 0 0 / 10%;
+        --sidebar-ring: 0.556 0 0;
+        
+        /* Semantic accent tokens - driven by preset */
+        --brand: 0.72 0.15 60;
+        --brand-foreground: 0.145 0 0;
+        --link: 0.72 0.15 60;
+        --selection: 0.72 0.15 60;
+        
+        /* Legacy LockedIn colors for backward compatibility */
+        --accent-gold: 0.72 0.15 60;
+        --accent-blue: 0.60 0.18 240;
+    }
+
+    .dark {
+        --background: 0.145 0 0;
+        --foreground: 0.985 0 0;
+        --card: 0.205 0 0;
+        --card-foreground: 0.985 0 0;
+        --popover: 0.269 0 0;
+        --popover-foreground: 0.985 0 0;
+        --primary: 0.922 0 0;
+        --primary-foreground: 0.205 0 0;
+        --secondary: 0.269 0 0;
+        --secondary-foreground: 0.985 0 0;
+        --muted: 0.269 0 0;
+        --muted-foreground: 0.708 0 0;
+        --accent: 0.269 0 0;
+        --accent-foreground: 0.985 0 0;
+        --destructive: 0.704 0.191 22.216;
+        --destructive-foreground: 0.205 0 0;
+        --border: 1 0 0 / 10%;
+        --input: 1 0 0 / 15%;
+        --ring: 0.72 0.15 60;
+        --chart-1: 0.488 0.243 264.376;
+        --chart-2: 0.696 0.17 162.48;
+        --chart-3: 0.769 0.188 70.08;
+        --chart-4: 0.627 0.265 303.9;
+        --chart-5: 0.645 0.246 16.439;
+        --sidebar: 0.205 0 0;
+        --sidebar-foreground: 0.985 0 0;
+        --sidebar-primary: 0.488 0.243 264.376;
+        --sidebar-primary-foreground: 0.985 0 0;
+        --sidebar-accent: 0.269 0 0;
+        --sidebar-accent-foreground: 0.985 0 0;
+        --sidebar-border: 1 0 0 / 10%;
+        --sidebar-ring: 0.439 0 0;
+        
+        /* Semantic accent tokens - driven by preset, same values work in dark */
+        --brand: 0.72 0.15 60;
+        --brand-foreground: 0.985 0 0;
+        --link: 0.72 0.15 60;
+        --selection: 0.72 0.15 60;
+        
+        /* Legacy LockedIn colors for backward compatibility */
+        --accent-gold: 0.72 0.15 60;
+        --accent-blue: 0.60 0.18 240;
+    }
+
+    * {
+        @apply border-border;
+    }
+    body {
+        @apply bg-background text-foreground;
+    }
+}
+
+@layer utilities {
+    .bg-gradient-radial {
+        background-image: radial-gradient(var(--tw-gradient-stops));
+    }
+    
+    /* Shared LockedIn background treatment */
+    .lockedin-bg {
+        position: relative;
+    }
+    
+    .lockedin-bg::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: url('/assets/generated/lockedin-bg-texture.dim_1920x1080.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        opacity: 0.08;
+        pointer-events: none;
+        z-index: 0;
+    }
+    
+    .lockedin-bg::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 50% 50%, 
+            oklch(var(--brand) / 0.03) 0%, 
+            transparent 50%,
+            oklch(var(--link) / 0.03) 100%);
+        pointer-events: none;
+        z-index: 0;
+    }
+    
+    .lockedin-bg > * {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .dark .lockedin-bg::before {
+        opacity: 0.12;
+    }
+    
+    .dark .lockedin-bg::after {
+        background: radial-gradient(circle at 50% 50%, 
+            oklch(var(--brand) / 0.02) 0%, 
+            transparent 50%,
+            oklch(var(--link) / 0.02) 100%);
+    }
+}
