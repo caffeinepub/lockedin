@@ -9,10 +9,10 @@ import Iter "mo:core/Iter";
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
 
-
-// Specify the migration to run as part of upgrade using Motoko's with syntax
-
 actor {
+  let accessControlState = AccessControl.initState();
+  include MixinAuthorization(accessControlState);
+
   module TimeFrame {
     public type Type = {
       #days30;
@@ -37,7 +37,7 @@ actor {
     description : Text;
     timeFrame : TimeFrame.Type;
     motivation : Text;
-    durationDays : Nat; // Custom duration in days
+    durationDays : Nat;
     lockedIn : Bool;
     createdAt : Int;
   };
@@ -70,7 +70,7 @@ actor {
 
   public type UserProfile = {
     name : Text;
-    avatar : Text; // Emojis as Text
+    avatar : Text;
   };
 
   type GoalProgress = {
@@ -104,9 +104,6 @@ actor {
   let userProfiles = Map.empty<Principal, UserProfile>();
   let userData = Map.empty<Principal, UserData>();
   var nextGoalId = 1;
-
-  let accessControlState = AccessControl.initState();
-  include MixinAuthorization(accessControlState);
 
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
@@ -142,7 +139,7 @@ actor {
       description;
       timeFrame;
       motivation;
-      durationDays = 0; // Default to 0 for non-custom duration
+      durationDays = 0;
       lockedIn = false;
       createdAt = getCurrentTimestamp();
     };
@@ -173,7 +170,7 @@ actor {
     userGoals.goals.get(goalId);
   };
 
-  public shared ({ caller }) func lockInGoal(goalId : Nat) : async () {
+  public shared ({ caller }) func lockInGoal(goalId : Nat) : async Bool {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can lock in goals");
     };
@@ -185,6 +182,7 @@ actor {
         let updatedGoal = { goal with lockedIn = true };
         userGoals.goals.add(goalId, updatedGoal);
         userData.add(caller, userGoals);
+        true;
       };
     };
   };
@@ -595,7 +593,6 @@ actor {
     goalId;
   };
 
-  // New deleteGoal endpoint
   public shared ({ caller }) func deleteGoal(goalId : Nat) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can delete goals");
@@ -607,12 +604,10 @@ actor {
       Runtime.trap("Unauthorized: Goal does not belong to caller");
     };
 
-    // Remove goal, progress, and weekly plans
     userGoals.goals.remove(goalId);
     userGoals.goalProgress.remove(goalId);
     userGoals.weeklyPlans.remove(goalId);
 
-    // Filter out related daily check-ins and weekly reviews
     let dailyCheckInsIter = userGoals.dailyCheckIns.values();
     let filteredDailyCheckInsIter = dailyCheckInsIter.filter(func(checkIn) { checkIn.goalId != goalId });
     userGoals.dailyCheckIns.clear();
@@ -630,7 +625,6 @@ actor {
     userData.add(caller, userGoals);
   };
 
-  // Helper query for checking goal existence (for frontend)
   public query ({ caller }) func goalExists(goalId : Nat) : async Bool {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can check goal existence");
@@ -639,7 +633,6 @@ actor {
     userGoals.goals.containsKey(goalId);
   };
 
-  // Helper query for getting duration of a goal (for frontend)
   public query ({ caller }) func getGoalDuration(goalId : Nat) : async ?Nat {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can access goal duration");
@@ -654,4 +647,3 @@ actor {
     };
   };
 };
-

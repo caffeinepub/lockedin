@@ -11,6 +11,24 @@ export interface GeneratedPlan {
   durationDays?: number;
 }
 
+/**
+ * Get the default duration in days for a given timeframe
+ */
+function getDefaultDurationForTimeframe(timeFrame: Type__1): number {
+  switch (timeFrame) {
+    case Type__1.days30:
+      return 30;
+    case Type__1.days90:
+      return 90;
+    case Type__1.months6to12:
+      return 270;
+    case Type__1.years1to5:
+      return 730;
+    default:
+      return 90;
+  }
+}
+
 export function generatePlan(
   goalDescription: string,
   timeFrame: Type__1,
@@ -18,32 +36,19 @@ export function generatePlan(
 ): GeneratedPlan {
   const now = new Date();
   
-  // Calculate timeframe duration in days
-  let durationDays = customDurationDays || 90;
+  // Calculate effective duration for plan generation
+  const defaultDuration = getDefaultDurationForTimeframe(timeFrame);
+  const effectiveDuration = customDurationDays || defaultDuration;
   
-  if (!customDurationDays) {
-    switch (timeFrame) {
-      case Type__1.days30:
-        durationDays = 30;
-        break;
-      case Type__1.days90:
-        durationDays = 90;
-        break;
-      case Type__1.months6to12:
-        durationDays = 270;
-        break;
-      case Type__1.years1to5:
-        durationDays = 730;
-        break;
-    }
-  }
+  // Only set durationDays in the plan if it differs from the timeframe default
+  const isCustomDuration = customDurationDays !== undefined && customDurationDays !== defaultDuration;
 
   // Generate milestones with deadlines
-  const milestoneCount = durationDays <= 30 ? 3 : durationDays <= 90 ? 4 : 5;
+  const milestoneCount = effectiveDuration <= 30 ? 3 : effectiveDuration <= 90 ? 4 : 5;
   const milestones: Array<{ desc: string; dueDate?: string }> = [];
   
   for (let i = 0; i < milestoneCount; i++) {
-    const daysOffset = Math.floor((durationDays / milestoneCount) * (i + 1));
+    const daysOffset = Math.floor((effectiveDuration / milestoneCount) * (i + 1));
     const dueDate = new Date(now.getTime() + daysOffset * 24 * 60 * 60 * 1000);
     
     milestones.push({
@@ -72,6 +77,6 @@ export function generatePlan(
     milestones,
     weeklyTasks,
     dailyTasks,
-    durationDays: customDurationDays,
+    durationDays: isCustomDuration ? customDurationDays : undefined,
   };
 }

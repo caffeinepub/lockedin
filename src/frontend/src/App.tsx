@@ -89,7 +89,19 @@ export default function App() {
             )}
           </main>
           <Footer />
-          <Toaster />
+          <Toaster 
+            position="top-center" 
+            richColors 
+            toastOptions={{
+              classNames: {
+                toast: 'toast-centered',
+                success: 'toast-success',
+                error: 'toast-error',
+                info: 'toast-info',
+                warning: 'toast-warning',
+              },
+            }}
+          />
           {showProfileModal && userProfile && (
             <ProfileSetupModal
               isSetup={false}

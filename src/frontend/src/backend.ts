@@ -189,7 +189,7 @@ export interface backendInterface {
     goalExists(goalId: bigint): Promise<boolean>;
     isCallerAdmin(): Promise<boolean>;
     isGoalLockedIn(goalId: bigint): Promise<boolean>;
-    lockInGoal(goalId: bigint): Promise<void>;
+    lockInGoal(goalId: bigint): Promise<boolean>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     submitDailyCheckIn(goalId: bigint, completedTasks: Array<Task>, missedTasks: Array<Task>): Promise<void>;
     submitWeeklyPlan(goalId: bigint, plannedTasks: Array<Task>, progressSummary: string): Promise<void>;
@@ -605,7 +605,7 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async lockInGoal(arg0: bigint): Promise<void> {
+    async lockInGoal(arg0: bigint): Promise<boolean> {
         if (this.processError) {
             try {
                 const result = await this.actor.lockInGoal(arg0);

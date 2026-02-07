@@ -1,46 +1,31 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-06T23:05:56.943Z",
+  "generatedAt": "2026-02-07T00:32:37.159Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 3,
+    "total": 2,
+    "implemented": 1,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Fix the non-working cancel/close behavior on the “Welcome to LockedIn!” goal library popup so the user can reliably dismiss it without selecting or adding any goals.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/GoalLibraryModal.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/GoalLibraryModal.tsx"
-        ]
+        "summary": "Implement a backend canister method `createGoalWithCustomDuration(description, timeFrame, motivation, durationDays)` that creates a goal with `durationDays` persisted (non-zero) and returns the new goal id, so the Auto Planner flow can save plans that specify a custom duration.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
       },
       {
         "id": "REQ-2",
-        "summary": "Update the “Welcome to LockedIn!” goal library popup layout and sizing to be mobile-responsive so it fits effectively on small screens (no clipped content, no unusable fixed heights, and primary actions remain accessible).",
+        "summary": "Fix the Auto Planner “Save & Lock In” flow to reliably create the goal, add milestones/weekly tasks/daily tasks, and lock in the goal, with clear user feedback when any step fails.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/GoalLibraryModal.tsx"
+          "frontend/src/components/AutoPlanner/AutoPlannerReview.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/GoalLibraryModal.tsx"
-        ]
-      },
-      {
-        "id": "REQ-3",
-        "summary": "Make the top-left app logo in the header always function as a “go to homepage” control: when clicked, it should take the user to the homepage experience (for authenticated users, return to the Dashboard home section; for unauthenticated users, return to the public HomePage).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/Header.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/Header.tsx"
+          "frontend/src/components/AutoPlanner/AutoPlannerReview.tsx"
         ]
       }
     ]
@@ -50,8 +35,7 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/GoalLibraryModal.tsx",
-    "frontend/src/components/Header.tsx",
+    "frontend/src/components/AutoPlanner/AutoPlannerReview.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

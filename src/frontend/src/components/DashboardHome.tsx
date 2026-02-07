@@ -8,9 +8,10 @@ type Section = 'goals' | 'milestones' | 'daily' | 'weekly' | 'analytics' | 'sett
 
 interface DashboardHomeProps {
   onNavigate: (section: Section) => void;
+  onCheckInGoal: (goalId: bigint) => void;
 }
 
-export default function DashboardHome({ onNavigate }: DashboardHomeProps) {
+export default function DashboardHome({ onNavigate, onCheckInGoal }: DashboardHomeProps) {
   const navigationRef = useRef<HTMLDivElement>(null);
   const { data: userProfile, isLoading: profileLoading } = useGetCallerUserProfile();
 
@@ -62,7 +63,7 @@ export default function DashboardHome({ onNavigate }: DashboardHomeProps) {
       </div>
 
       {/* Locked-in Goals Section */}
-      <LockedInGoalsSection onNavigate={onNavigate} />
+      <LockedInGoalsSection onNavigate={onNavigate} onCheckInGoal={onCheckInGoal} />
 
       {/* Navigation Section */}
       <div ref={navigationRef} className="space-y-6 scroll-mt-24">

@@ -2,29 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-fix-the-non-working-cancel-close-behavior-on-the-welcome-to-lockedin-goal-library-popup-so-the-user-can-reliably-dismiss-it-without-selecting-or-adding-any-goals",
-      "featureTitle": "Fix the non-working cancel/close behavior on the “Welcome to LockedIn!” goal library popup so the user can reliably dismiss it without selecting or adding any goals.",
+      "featureId": "feature-fix-the-auto-planner-save-lock-in-flow-to-reliably-create-the-goal-add-milestones-weekly-tasks-daily-tasks-and-lock-in-the-goal-with-clear-user-feedback-when-any-step-fails",
+      "featureTitle": "Fix the Auto Planner “Save & Lock In” flow to reliably create the goal, add milestones/weekly tasks/daily tasks, and lock in the goal, with clear user feedback when any step fails.",
       "files": [
-        "frontend/src/components/GoalLibraryModal.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-1"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-update-the-welcome-to-lockedin-goal-library-popup-layout-and-sizing-to-be-mobile-responsive-so-it-fits-effectively-on-small-screens-no-clipped-content-no-unusable-fixed-heights-and-primary-actions-remain-accessible",
-      "featureTitle": "Update the “Welcome to LockedIn!” goal library popup layout and sizing to be mobile-responsive so it fits effectively on small screens (no clipped content, no unusable fixed heights, and primary actions remain accessible).",
-      "files": [
-        "frontend/src/components/GoalLibraryModal.tsx"
+        "frontend/src/components/AutoPlanner/AutoPlannerReview.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -36,25 +17,6 @@
       ],
       "testIds": [
         "REQ-2"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-make-the-top-left-app-logo-in-the-header-always-function-as-a-go-to-homepage-control-when-clicked-it-should-take-the-user-to-the-homepage-experience-for-authenticated-users-return-to-the-dashboard-home-section-for-unauthenticated-users-return-to-the-public-homepage",
-      "featureTitle": "Make the top-left app logo in the header always function as a “go to homepage” control: when clicked, it should take the user to the homepage experience (for authenticated users, return to the Dashboard home section; for unauthenticated users, return to the public HomePage).",
-      "files": [
-        "frontend/src/components/Header.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-3"
       ],
       "confidence": "high"
     }

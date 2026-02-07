@@ -104,7 +104,7 @@ export interface _SERVICE {
   'goalExists' : ActorMethod<[bigint], boolean>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'isGoalLockedIn' : ActorMethod<[bigint], boolean>,
-  'lockInGoal' : ActorMethod<[bigint], undefined>,
+  'lockInGoal' : ActorMethod<[bigint], boolean>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'submitDailyCheckIn' : ActorMethod<
     [bigint, Array<Task>, Array<Task>],

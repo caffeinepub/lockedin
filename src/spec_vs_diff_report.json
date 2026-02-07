@@ -1,62 +1,46 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-06T23:05:56.941Z",
-  "summary": "Diff updates GoalLibraryModal with an onOpenChange handler that closes on overlay/Escape via handleSkip, and updates Header with a clickable logo button that sets dashboard section to 'home' when authenticated and scrolls to top when unauthenticated. The diff also modifies metadata/state summary files that describe additional unrelated features not requested.",
+  "generatedAt": "2026-02-07T00:32:37.156Z",
+  "summary": "REQ-2 shows partial implementation in AutoPlannerReview.tsx (actor readiness check, missing-method guard for custom duration, isSaving state, step-wise try/catch with readable error wrapping, and goal verification). However, REQ-1 backend work is not evidenced at all, and the diff is truncated before showing the rest of the save sequence (milestones/tasks/lock-in), success handling (toast + onSaveComplete), and guaranteed isSaving reset/disabled button behavior.",
   "missing_requirements": [
     {
       "id": "REQ-1",
-      "requirement": "Fix the non-working cancel/close behavior on the “Welcome to LockedIn!” goal library popup so the user can reliably dismiss it without selecting or adding any goals.",
-      "reason": "The diff shows logic to close when the dialog open state changes to false (overlay click/Escape), but the truncated diff does not show an explicit cancel/close control in the modal UI wired to handleSkip/onClose, nor evidence that the dialog component is actually receiving handleOpenChange as its onOpenChange prop.",
+      "requirement": "Implement backend canister method `createGoalWithCustomDuration(description, timeFrame, motivation, durationDays)` in `backend/main.mo`, with same authorization as `createGoal`, persisting durationDays and returning new goal id.",
+      "reason": "No backend file changes are shown; `backend/main.mo` is not modified in the diff summary, so there is no evidence the method was added or that durationDays is persisted.",
       "evidence": [
-        "frontend/src/components/GoalLibraryModal.tsx"
+        "File diff summary lists modified files: only frontend/src/components/AutoPlanner/AutoPlannerReview.tsx, frontend-file-summaries.txt, project_state.json (no backend/main.mo)"
       ]
     },
     {
       "id": "REQ-2",
-      "requirement": "Update the “Welcome to LockedIn!” goal library popup layout and sizing to be mobile-responsive so it fits effectively on small screens.",
-      "reason": "The diff snippet shows imports (e.g., ScrollArea) but the relevant responsive layout/styling changes (viewport sizing, scroll behavior for list vs. bottom action area, mobile usability of tabs) are not visible in the truncated portion, so there is insufficient evidence that the acceptance criteria are implemented.",
+      "requirement": "Auto Planner “Save & Lock In” performs the full save sequence (create goal, add milestones/weekly tasks/daily tasks, lock in goal) and on success shows a success toast and calls `onSaveComplete()`; on any failure shows error toast and resets `isSaving`; button remains disabled during save.",
+      "reason": "AutoPlannerReview.tsx is truncated before showing milestones/tasks/lock-in steps and the final success/failure UI state handling. The visible portion sets `setIsSaving(true)` but does not show any `finally`/reset, success toast, `onSaveComplete()` call, or button disabled binding.",
       "evidence": [
-        "frontend/src/components/GoalLibraryModal.tsx"
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "requirement": "Make the top-left app logo in the header always function as a “go to homepage” control for both authenticated and unauthenticated users.",
-      "reason": "Authenticated behavior appears to be implemented via setActiveSection('home'), but unauthenticated behavior only scrolls the current page to the top rather than navigating to the public HomePage view. If the user is unauthenticated and not already on HomePage, this would not satisfy the requirement as written.",
-      "evidence": [
-        "frontend/src/components/Header.tsx"
+        "frontend/src/components/AutoPlanner/AutoPlannerReview.tsx (truncated): shows actor check, missing-method guard, `setIsSaving(true)`, goal creation + verification; truncates at \"// Step 3: Add milestones...\" before rest of sequence and any completion/reset logic"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Added goal deletion support and custom goal duration creation mutations (useDeleteGoal, useCreateGoalWithCustomDuration).",
-      "reason": "These features are described in the updated frontend-file-summaries.txt but were not requested in the BuildRequest and are not part of the stated non-goals.",
+      "description": "Updates to project tracking metadata (project_state.json) marking requests as pending/new project state.",
+      "reason": "BuildRequest only asks for backend + frontend functional fixes; it does not request updates to project metadata/state files.",
       "evidence": [
-        "frontend-file-summaries.txt"
+        "project_state.json"
       ]
     },
     {
-      "description": "Dashboard behavior changes related to goal deletion (handleGoalDeleted) and GoalDetail delete button with confirmation dialog.",
-      "reason": "These are described in frontend-file-summaries.txt but are outside the requested scope (welcome popup cancel/mobile + header logo home behavior).",
+      "description": "Large-scale unrelated frontend feature/documentation summary updates (e.g., footer attribution/version text, theme/toaster styling, dashboard behavior, etc.).",
+      "reason": "These items are not part of the requested fix for Auto Planner save/lock-in or the backend method; they appear as unrelated changes in the modified frontend-file-summaries.txt.",
       "evidence": [
-        "frontend-file-summaries.txt"
-      ]
-    },
-    {
-      "description": "Broad UI/branding/style changes across many pages/components (HomePage hero/features, DashboardHome navigation cards, global OKLCH theme tokens, tailwind config semantic tokens, etc.).",
-      "reason": "These are described as changed in frontend-file-summaries.txt but were not requested and some conflict with the non-goal of not redesigning broader navigation/pages.",
-      "evidence": [
-        "frontend-file-summaries.txt"
+        "frontend-file-summaries.txt (truncated)"
       ]
     }
   ],
-  "confidence": 0.56,
+  "confidence": 0.68,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/components/GoalLibraryModal.tsx",
-    "frontend/src/components/Header.tsx",
+    "frontend/src/components/AutoPlanner/AutoPlannerReview.tsx",
     "project_state.json"
   ]
 }

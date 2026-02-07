@@ -1,54 +1,22 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Goal library modal close fixes + mobile layout + clickable header logo home navigation",
+  "title": "Fix Auto Planner “Save & Lock In” reliability and feedback",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Fix the Welcome goal library popup cancel/close behavior so it reliably dismisses without triggering goal creation.",
-      "acceptanceCriteria": [
-        "When the user activates the popup’s cancel/close control, the popup closes immediately.",
-        "Closing the popup does not create any goals or trigger the “Add goals” flow.",
-        "Clicking outside the dialog and pressing Escape (if supported by the dialog component) closes the popup without errors.",
-        "No console errors occur when closing the popup (including type/signature mismatches for onOpenChange handlers)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/GoalLibraryModal.tsx",
-          "operation": "modify",
-          "description": "Use the shadcn-ui Dialog component correctly by updating onOpenChange to accept the open boolean and only call onClose when it transitions to closed (prevents type/signature mismatch and enables overlay/Escape close). Ensure the close path does not call handleAddGoals or any mutations. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
       "id": "REQ-2",
-      "summary": "Make the Welcome goal library popup mobile-responsive with usable tabs, scrollable content, and accessible actions on small screens.",
+      "summary": "Make Auto Planner “Save & Lock In” run the full save sequence reliably with clear success/error feedback and proper loading/disable behavior.",
       "acceptanceCriteria": [
-        "On common mobile widths (e.g., 320–430px), the dialog content remains within the viewport (no horizontal overflow) and can be fully accessed via scrolling if needed.",
-        "The goal list area scrolls appropriately while keeping the bottom action area (selected count + buttons) reachable and usable.",
-        "Tabs/category controls remain usable on mobile (do not render off-screen or become too small to tap)."
+        "Clicking “Save & Lock In” in `frontend/src/components/AutoPlanner/AutoPlannerReview.tsx` performs the full save sequence without throwing a missing-method/actor error.",
+        "When the save succeeds, a success toast is shown and `onSaveComplete()` is called, and the created goal appears in the goals list as locked in.",
+        "When any step fails (create goal, add milestones/tasks, lock in), the UI shows an error toast with a readable message and the button returns to an enabled non-loading state (i.e., `isSaving` is reset).",
+        "The button remains disabled while a save is in progress to prevent double-submission."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/GoalLibraryModal.tsx",
+          "path": "frontend/src/components/AutoPlanner/AutoPlannerReview.tsx",
           "operation": "modify",
-          "description": "Refactor the modal layout to be responsive: make DialogContent a flex-col container sized to the viewport on mobile (avoid fixed heights), change the goal list area to use ScrollArea with flex-1/min-h-0 instead of a fixed h-[400px], and make the bottom action row reliably reachable (e.g., keep it at the bottom with proper spacing and wrapping). Update TabsList to be mobile-friendly (e.g., fewer columns on small screens or horizontal scroll) so category controls stay tappable. Uses shadcn-ui Dialog/Tabs/ScrollArea; verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "summary": "Make the header logo always navigate to the appropriate home experience (Dashboard home when authenticated; public HomePage when unauthenticated).",
-      "acceptanceCriteria": [
-        "Clicking the header logo while authenticated navigates the user to the Dashboard’s home view/section (equivalent to selecting “Home” in navigation).",
-        "Clicking the header logo while unauthenticated returns the user to the public HomePage view.",
-        "The logo is visually and semantically clickable (e.g., button/link semantics and accessible name) and does not interfere with other header actions."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/Header.tsx",
-          "operation": "modify",
-          "description": "Wrap the logo image in an accessible interactive element (button/link semantics with an aria-label). On click: if authenticated, call DashboardNavigationContext setActiveSection('home') (matching the Dashboard navigation behavior); if unauthenticated, navigate to the public HomePage view (e.g., ensure location/state returns to the root experience without adding new routes). Keep the logo click target from interfering with other header actions. Verify any shadcn-ui Button patterns used before implementing."
+          "description": "Refactor the “Save & Lock In” handler into an explicit, step-labeled async sequence using the existing actor connection. Add a runtime check that `createGoalWithCustomDuration` exists before calling it (otherwise show a readable error toast and abort) to avoid missing-method errors. Ensure per-step failure produces a clear error toast (including which step failed), and always reset `isSaving` in a `finally` block so the button re-enables. Keep the button disabled while saving to prevent double submission. After success, trigger React Query cache refresh (e.g., invalidate goals/goal queries) so the new locked-in goal appears reliably, then show a success toast and call `onSaveComplete()`. Verify the component's usage instructions before implementing."
         }
       ]
     }

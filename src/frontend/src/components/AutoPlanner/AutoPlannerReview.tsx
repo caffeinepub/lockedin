@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { Plus, Trash2, Save, ArrowLeft, Calendar } from 'lucide-react';
+import { Plus, Trash2, Save, ArrowLeft } from 'lucide-react';
 import type { GeneratedPlan } from '../../lib/autoPlanner/generatePlan';
 import type { Milestone, Task } from '../../backend';
 import {
@@ -14,7 +14,10 @@ import {
   useAddDailyTasks,
   useLockInGoal,
 } from '../../hooks/useQueries';
+import { useActor } from '../../hooks/useActor';
 import { toast } from 'sonner';
+import { getErrorMessage } from '../../utils/errors';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface AutoPlannerReviewProps {
   plan: GeneratedPlan;
@@ -37,6 +40,8 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
     plan.dailyTasks.map((t) => t.desc)
   );
 
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
   const createGoal = useCreateGoal();
   const createGoalWithCustomDuration = useCreateGoalWithCustomDuration();
   const addMilestones = useAddMilestones();
@@ -47,27 +52,62 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async () => {
+    if (!actor) {
+      toast.error('Backend connection not ready. Please wait a moment and try again.');
+      return;
+    }
+
+    // Runtime check for createGoalWithCustomDuration method
+    if (plan.durationDays !== undefined && typeof actor.createGoalWithCustomDuration !== 'function') {
+      toast.error('Custom duration feature is not available. Please try again or contact support.');
+      return;
+    }
+
     setIsSaving(true);
 
     try {
-      // Create goal with or without custom duration
+      // Step 1: Create goal with or without custom duration
       let goalId: bigint;
-      if (plan.durationDays) {
-        goalId = await createGoalWithCustomDuration.mutateAsync({
-          description: editedGoal,
-          timeFrame: plan.timeFrame,
-          motivation: plan.motivation,
-          durationDays: plan.durationDays,
-        });
-      } else {
-        goalId = await createGoal.mutateAsync({
-          description: editedGoal,
-          timeFrame: plan.timeFrame,
-          motivation: plan.motivation,
-        });
+      try {
+        if (plan.durationDays !== undefined) {
+          goalId = await createGoalWithCustomDuration.mutateAsync({
+            description: editedGoal,
+            timeFrame: plan.timeFrame,
+            motivation: plan.motivation,
+            durationDays: plan.durationDays,
+          });
+        } else {
+          goalId = await createGoal.mutateAsync({
+            description: editedGoal,
+            timeFrame: plan.timeFrame,
+            motivation: plan.motivation,
+          });
+        }
+      } catch (error) {
+        throw new Error(`Goal creation failed: ${getErrorMessage(error)}`);
       }
 
-      // Add milestones with due dates
+      // Step 2: Verify the goal was created successfully
+      try {
+        const createdGoal = await actor.getGoal(goalId);
+        if (!createdGoal) {
+          throw new Error('Goal was not created successfully');
+        }
+
+        // If custom duration was used, verify it was persisted correctly
+        if (plan.durationDays !== undefined) {
+          const persistedDuration = Number(createdGoal.durationDays);
+          if (persistedDuration !== plan.durationDays) {
+            throw new Error(
+              `Goal duration mismatch: expected ${plan.durationDays} days, got ${persistedDuration} days`
+            );
+          }
+        }
+      } catch (verifyError) {
+        throw new Error(`Goal verification failed: ${getErrorMessage(verifyError)}`);
+      }
+
+      // Step 3: Add milestones with due dates
       const milestonesToAdd: Milestone[] = editedMilestones
         .filter((m) => m.desc.trim())
         .map((m) => ({
@@ -76,10 +116,14 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
         }));
 
       if (milestonesToAdd.length > 0) {
-        await addMilestones.mutateAsync({ goalId, milestones: milestonesToAdd });
+        try {
+          await addMilestones.mutateAsync({ goalId, milestones: milestonesToAdd });
+        } catch (error) {
+          throw new Error(`Adding milestones failed: ${getErrorMessage(error)}`);
+        }
       }
 
-      // Add weekly tasks
+      // Step 4: Add weekly tasks
       const weeklyTasksToAdd: Task[] = editedWeeklyTasks
         .filter((t) => t.trim())
         .map((desc) => ({
@@ -89,10 +133,14 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
         }));
 
       if (weeklyTasksToAdd.length > 0) {
-        await addWeeklyTasks.mutateAsync({ goalId, tasks: weeklyTasksToAdd });
+        try {
+          await addWeeklyTasks.mutateAsync({ goalId, tasks: weeklyTasksToAdd });
+        } catch (error) {
+          throw new Error(`Adding weekly tasks failed: ${getErrorMessage(error)}`);
+        }
       }
 
-      // Add daily tasks
+      // Step 5: Add daily tasks
       const dailyTasksToAdd: Task[] = editedDailyTasks
         .filter((t) => t.trim())
         .map((desc) => ({
@@ -102,17 +150,32 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
         }));
 
       if (dailyTasksToAdd.length > 0) {
-        await addDailyTasks.mutateAsync({ goalId, tasks: dailyTasksToAdd });
+        try {
+          await addDailyTasks.mutateAsync({ goalId, tasks: dailyTasksToAdd });
+        } catch (error) {
+          throw new Error(`Adding daily tasks failed: ${getErrorMessage(error)}`);
+        }
       }
 
-      // Lock in the goal
-      await lockInGoal.mutateAsync(goalId);
+      // Step 6: Lock in the goal
+      try {
+        await lockInGoal.mutateAsync(goalId);
+      } catch (error) {
+        throw new Error(`Locking in goal failed: ${getErrorMessage(error)}`);
+      }
 
+      // Step 7: Refresh cache to ensure new goal appears
+      await queryClient.invalidateQueries({ queryKey: ['goals'] });
+      await queryClient.invalidateQueries({ queryKey: ['goal', goalId.toString()] });
+
+      // Success!
       toast.success("You're LockedIn! Your plan is ready.");
       onSaveComplete();
-    } catch (error: any) {
-      toast.error(`Failed to save plan: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMsg = getErrorMessage(error, 'Failed to save plan');
+      toast.error(errorMsg);
     } finally {
+      // Always reset saving state
       setIsSaving(false);
     }
   };
@@ -140,6 +203,7 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
             value={editedGoal}
             onChange={(e) => setEditedGoal(e.target.value)}
             placeholder="Goal description"
+            disabled={isSaving}
           />
         </div>
 
@@ -186,6 +250,7 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
                 }}
                 placeholder={`Milestone ${index + 1}`}
                 className="flex-1"
+                disabled={isSaving}
               />
               <Input
                 type="date"
@@ -196,6 +261,7 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
                   setEditedMilestones(updated);
                 }}
                 className="w-40"
+                disabled={isSaving}
               />
               {editedMilestones.length > 1 && (
                 <Button
@@ -204,6 +270,7 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
                   onClick={() => {
                     setEditedMilestones(editedMilestones.filter((_, i) => i !== index));
                   }}
+                  disabled={isSaving}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -214,6 +281,7 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
             variant="outline"
             onClick={() => setEditedMilestones([...editedMilestones, { desc: '', dueDate: '' }])}
             className="w-full"
+            disabled={isSaving}
           >
             <Plus className="h-4 w-4 mr-2" />
             Add Milestone
@@ -235,6 +303,7 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
                   setEditedWeeklyTasks(updated);
                 }}
                 placeholder={`Weekly task ${index + 1}`}
+                disabled={isSaving}
               />
               {editedWeeklyTasks.length > 1 && (
                 <Button
@@ -243,6 +312,7 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
                   onClick={() => {
                     setEditedWeeklyTasks(editedWeeklyTasks.filter((_, i) => i !== index));
                   }}
+                  disabled={isSaving}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -253,6 +323,7 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
             variant="outline"
             onClick={() => setEditedWeeklyTasks([...editedWeeklyTasks, ''])}
             className="w-full"
+            disabled={isSaving}
           >
             <Plus className="h-4 w-4 mr-2" />
             Add Weekly Task
@@ -274,6 +345,7 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
                   setEditedDailyTasks(updated);
                 }}
                 placeholder={`Daily task ${index + 1}`}
+                disabled={isSaving}
               />
               {editedDailyTasks.length > 1 && (
                 <Button
@@ -282,6 +354,7 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
                   onClick={() => {
                     setEditedDailyTasks(editedDailyTasks.filter((_, i) => i !== index));
                   }}
+                  disabled={isSaving}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -292,6 +365,7 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
             variant="outline"
             onClick={() => setEditedDailyTasks([...editedDailyTasks, ''])}
             className="w-full"
+            disabled={isSaving}
           >
             <Plus className="h-4 w-4 mr-2" />
             Add Daily Task
@@ -302,13 +376,13 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
 
         {/* Actions */}
         <div className="flex gap-3">
-          <Button onClick={onBack} variant="outline" className="flex-1">
+          <Button onClick={onBack} variant="outline" className="flex-1" disabled={isSaving}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
           <Button
             onClick={handleSave}
-            disabled={isSaving || !editedGoal.trim()}
+            disabled={isSaving || !editedGoal.trim() || !actor}
             className="flex-1 bg-brand hover:bg-brand/90 text-brand-foreground"
           >
             {isSaving ? (

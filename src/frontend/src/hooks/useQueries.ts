@@ -11,6 +11,7 @@ import type {
 import { Type__1 } from '../backend';
 import { toast } from 'sonner';
 import type { GoalTemplate } from '../lib/goalTemplates';
+import { getErrorMessage } from '../utils/errors';
 
 // User Profile
 export function useGetCallerUserProfile() {
@@ -47,8 +48,8 @@ export function useSaveCallerUserProfile() {
       queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
       toast.success('Profile saved successfully');
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to save profile: ${error.message}`);
+    onError: (error: unknown) => {
+      toast.error(`Failed to save profile: ${getErrorMessage(error)}`);
     },
   });
 }
@@ -111,8 +112,8 @@ export function useCreateGoal() {
       queryClient.invalidateQueries({ queryKey: ['goals'] });
       toast.success("You're LockedIn.");
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to create goal: ${error.message}`);
+    onError: (error: unknown) => {
+      toast.error(`Failed to create goal: ${getErrorMessage(error)}`);
     },
   });
 }
@@ -145,8 +146,8 @@ export function useCreateGoalWithCustomDuration() {
       queryClient.invalidateQueries({ queryKey: ['goals'] });
       toast.success("You're LockedIn.");
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to create goal: ${error.message}`);
+    onError: (error: unknown) => {
+      toast.error(`Failed to create goal: ${getErrorMessage(error)}`);
     },
   });
 }
@@ -186,8 +187,8 @@ export function useCreateGoalFromTemplate() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['goals'] });
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to create goal: ${error.message}`);
+    onError: (error: unknown) => {
+      toast.error(`Failed to create goal: ${getErrorMessage(error)}`);
     },
   });
 }
@@ -213,8 +214,8 @@ export function useDeleteGoal() {
       queryClient.invalidateQueries({ queryKey: ['goalLockedIn', goalId.toString()] });
       toast.success('Goal deleted successfully');
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to delete goal: ${error.message}`);
+    onError: (error: unknown) => {
+      toast.error(`Failed to delete goal: ${getErrorMessage(error)}`);
     },
   });
 }
@@ -250,8 +251,8 @@ export function useAddMilestones() {
       queryClient.setQueryData(['milestones', variables.goalId.toString()], variables.milestones);
       queryClient.invalidateQueries({ queryKey: ['milestones', variables.goalId.toString()] });
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to add milestones: ${error.message}`);
+    onError: (error: unknown) => {
+      toast.error(`Failed to add milestones: ${getErrorMessage(error)}`);
     },
   });
 }
@@ -287,8 +288,8 @@ export function useAddWeeklyTasks() {
       queryClient.setQueryData(['weeklyTasks', variables.goalId.toString()], variables.tasks);
       queryClient.invalidateQueries({ queryKey: ['weeklyTasks', variables.goalId.toString()] });
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to add weekly tasks: ${error.message}`);
+    onError: (error: unknown) => {
+      toast.error(`Failed to add weekly tasks: ${getErrorMessage(error)}`);
     },
   });
 }
@@ -324,8 +325,8 @@ export function useAddDailyTasks() {
       queryClient.setQueryData(['dailyTasks', variables.goalId.toString()], variables.tasks);
       queryClient.invalidateQueries({ queryKey: ['dailyTasks', variables.goalId.toString()] });
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to add daily tasks: ${error.message}`);
+    onError: (error: unknown) => {
+      toast.error(`Failed to add daily tasks: ${getErrorMessage(error)}`);
     },
   });
 }
@@ -358,13 +359,35 @@ export function useLockInGoal() {
       return actor.lockInGoal(goalId);
     },
     onSuccess: (_, goalId) => {
+      // Optimistically update the locked-in state
+      queryClient.setQueryData(['goalLockedIn', goalId.toString()], true);
+      
+      // Update the goal in cache to reflect locked state
+      const goalKey = ['goal', goalId.toString()];
+      const currentGoal = queryClient.getQueryData<Goal | null>(goalKey);
+      if (currentGoal) {
+        queryClient.setQueryData(goalKey, { ...currentGoal, lockedIn: true });
+      }
+      
+      // Update goals list
+      const goalsKey = ['goals'];
+      const currentGoals = queryClient.getQueryData<Goal[]>(goalsKey);
+      if (currentGoals) {
+        queryClient.setQueryData(
+          goalsKey,
+          currentGoals.map((g) => (g.id === goalId ? { ...g, lockedIn: true } : g))
+        );
+      }
+      
+      // Invalidate to ensure fresh data
       queryClient.invalidateQueries({ queryKey: ['goalLockedIn', goalId.toString()] });
       queryClient.invalidateQueries({ queryKey: ['goal', goalId.toString()] });
       queryClient.invalidateQueries({ queryKey: ['goals'] });
+      
       toast.success("You're LockedIn.");
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to lock in goal: ${error.message}`);
+    onError: (error: unknown) => {
+      toast.error(`Failed to lock in goal: ${getErrorMessage(error)}`);
     },
   });
 }
@@ -422,14 +445,15 @@ export function useSubmitDailyCheckIn() {
       return actor.submitDailyCheckIn(goalId, completedTasks, missedTasks);
     },
     onSuccess: (_, variables) => {
+      // Invalidate and refetch check-ins to show the new submission
       queryClient.invalidateQueries({ queryKey: ['dailyCheckIns'] });
       queryClient.invalidateQueries({
         queryKey: ['dailyCheckIns', variables.goalId.toString()],
       });
-      toast.success("You're LockedIn.");
+      toast.success("Check-in submitted! You're LockedIn.");
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to submit check-in: ${error.message}`);
+    onError: (error: unknown) => {
+      toast.error(`Failed to submit check-in: ${getErrorMessage(error)}`);
     },
   });
 }
@@ -495,8 +519,8 @@ export function useSubmitWeeklyReview() {
       });
       toast.success("You're LockedIn.");
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to submit review: ${error.message}`);
+    onError: (error: unknown) => {
+      toast.error(`Failed to submit review: ${getErrorMessage(error)}`);
     },
   });
 }

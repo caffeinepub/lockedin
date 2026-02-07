@@ -1,72 +1,53 @@
 {
   "kind": "build_request",
-  "title": "Fix Welcome popup cancel behavior, make popup mobile-friendly, and make header logo always return to homepage",
-  "priority": "normal",
+  "title": "Fix non-working “Save & Lock In” button in Auto Planner",
+  "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Fix the non-working cancel/close behavior on the “Welcome to LockedIn!” goal library popup so the user can reliably dismiss it without selecting or adding any goals.",
-      "target": "frontend",
+      "text": "Implement a backend canister method `createGoalWithCustomDuration(description, timeFrame, motivation, durationDays)` that creates a goal with `durationDays` persisted (non-zero) and returns the new goal id, so the Auto Planner flow can save plans that specify a custom duration.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-3"
         ],
         "quotes": [
-          "the cancel button on the welcome to lockedin popup isn't working"
+          "the save and lock in button isnt working"
         ]
       },
       "acceptanceCriteria": [
-        "When the user activates the popup’s cancel/close control, the popup closes immediately.",
-        "Closing the popup does not create any goals or trigger the “Add goals” flow.",
-        "Clicking outside the dialog and pressing Escape (if supported by the dialog component) closes the popup without errors.",
-        "No console errors occur when closing the popup (including type/signature mismatches for onOpenChange handlers)."
+        "`backend/main.mo` exposes `createGoalWithCustomDuration` as a shared method and enforces the same authorization checks as `createGoal`.",
+        "The new goal’s `durationDays` equals the provided `durationDays` argument (Nat) when retrieved via `getGoal`.",
+        "No state migration is required and existing goals are unaffected."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Update the “Welcome to LockedIn!” goal library popup layout and sizing to be mobile-responsive so it fits effectively on small screens (no clipped content, no unusable fixed heights, and primary actions remain accessible).",
+      "text": "Fix the Auto Planner “Save & Lock In” flow to reliably create the goal, add milestones/weekly tasks/daily tasks, and lock in the goal, with clear user feedback when any step fails.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-3"
         ],
         "quotes": [
-          "also shape the popup to fit effectively on mobile"
+          "the save and lock in button isnt working"
         ]
       },
       "acceptanceCriteria": [
-        "On common mobile widths (e.g., 320–430px), the dialog content remains within the viewport (no horizontal overflow) and can be fully accessed via scrolling if needed.",
-        "The goal list area scrolls appropriately while keeping the bottom action area (selected count + buttons) reachable and usable.",
-        "Tabs/category controls remain usable on mobile (do not render off-screen or become too small to tap)."
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "text": "Make the top-left app logo in the header always function as a “go to homepage” control: when clicked, it should take the user to the homepage experience (for authenticated users, return to the Dashboard home section; for unauthenticated users, return to the public HomePage).",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "The Logo on the app at the top left edge should redirect to the homepage when clicked always"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Clicking the header logo while authenticated navigates the user to the Dashboard’s home view/section (equivalent to selecting “Home” in navigation).",
-        "Clicking the header logo while unauthenticated returns the user to the public HomePage view.",
-        "The logo is visually and semantically clickable (e.g., button/link semantics and accessible name) and does not interfere with other header actions."
+        "Clicking “Save & Lock In” in `frontend/src/components/AutoPlanner/AutoPlannerReview.tsx` performs the full save sequence without throwing a missing-method/actor error.",
+        "When the save succeeds, a success toast is shown and `onSaveComplete()` is called, and the created goal appears in the goals list as locked in.",
+        "When any step fails (create goal, add milestones/tasks, lock in), the UI shows an error toast with a readable message and the button returns to an enabled non-loading state (i.e., `isSaving` is reset).",
+        "The button remains disabled while a save is in progress to prevent double-submission."
       ]
     }
   ],
   "constraints": [
-    "Frontend changes must not modify files in the immutable paths list (notably anything under frontend/src/components/ui and the Internet Identity/actor hooks).",
-    "Backend must remain single-actor; no backend changes are required for this request."
+    "Backend must remain a single-actor Motoko canister (all logic in `backend/main.mo`).",
+    "Do not edit any files under `frontend/src/components/ui` or other immutable frontend paths listed in SYSTEM_CONTEXT."
   ],
   "nonGoals": [
-    "Redesigning the entire dashboard navigation or adding new routes/pages beyond making the logo act as a reliable home control.",
-    "Changing authentication behavior or adding new auth providers.",
-    "Adding new goal-template features beyond fixing the popup close/cancel behavior and mobile layout."
+    "Redesigning the Auto Planner UI or changing the planning workflow steps beyond making the save/lock-in action work reliably.",
+    "Adding third-party services, external databases, or non-Internet-Identity authentication."
   ],
   "imageRequirements": {
     "required": [],

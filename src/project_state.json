@@ -4,31 +4,15 @@
   "summary": "New project",
   "architectural_notes": [],
   "known_issues": [
-    "Cancel button on “Welcome to lockedin” popup is not working"
+    "\"Save and lock in\" button is not working (reported by user)."
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-fix-the-non-working-cancel-close-behavior-on-the-welcome-to-lockedin-goal-library-popup-so-the-user-can-reliably-dismiss-it-without-selecting-or-adding-any-goals",
-      "title": "Fix the non-working cancel/close behavior on the “Welcome to LockedIn!” goal library popup so the user can reliably dismiss it without selecting or adding any goals.",
-      "reqIds": [
-        "REQ-1"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-welcome-to-lockedin-goal-library-popup-layout-and-sizing-to-be-mobile-responsive-so-it-fits-effectively-on-small-screens-no-clipped-content-no-unusable-fixed-heights-and-primary-actions-remain-accessible",
-      "title": "Update the “Welcome to LockedIn!” goal library popup layout and sizing to be mobile-responsive so it fits effectively on small screens (no clipped content, no unusable fixed heights, and primary actions remain accessible).",
+      "id": "feature-fix-the-auto-planner-save-lock-in-flow-to-reliably-create-the-goal-add-milestones-weekly-tasks-daily-tasks-and-lock-in-the-goal-with-clear-user-feedback-when-any-step-fails",
+      "title": "Fix the Auto Planner “Save & Lock In” flow to reliably create the goal, add milestones/weekly tasks/daily tasks, and lock in the goal, with clear user feedback when any step fails.",
       "reqIds": [
         "REQ-2"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-make-the-top-left-app-logo-in-the-header-always-function-as-a-go-to-homepage-control-when-clicked-it-should-take-the-user-to-the-homepage-experience-for-authenticated-users-return-to-the-dashboard-home-section-for-unauthenticated-users-return-to-the-public-homepage",
-      "title": "Make the top-left app logo in the header always function as a “go to homepage” control: when clicked, it should take the user to the homepage experience (for authenticated users, return to the Dashboard home section; for unauthenticated users, return to the public HomePage).",
-      "reqIds": [
-        "REQ-3"
       ],
       "version": 1
     }
@@ -36,24 +20,14 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Fix non-working Cancel button on “Welcome to lockedin” popup",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "Make “Welcome to lockedin” popup mobile-friendly/responsive sizing and layout",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-3",
-      "summary": "Ensure top-left app logo always redirects to homepage when clicked",
-      "reqIds": [],
+      "summary": "Implement a backend canister method `createGoalWithCustomDuration(description, timeFrame, motivation, durationDays)` that creates a goal with `durationDays` persisted (non-zero) and returns the new goal id, so the Auto Planner flow can save plans that specify a custom duration.",
+      "reqIds": [
+        "REQ-1"
+      ],
       "status": "pending"
     }
   ],
-  "projectName": "Fix Welcome popup cancel behavior, make popup mobile-friendly, and make header logo always return to homepage",
+  "projectName": "Fix non-working “Save & Lock In” button in Auto Planner",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

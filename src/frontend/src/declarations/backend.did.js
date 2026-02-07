@@ -145,7 +145,7 @@ export const idlService = IDL.Service({
   'goalExists' : IDL.Func([IDL.Nat], [IDL.Bool], ['query']),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'isGoalLockedIn' : IDL.Func([IDL.Nat], [IDL.Bool], ['query']),
-  'lockInGoal' : IDL.Func([IDL.Nat], [], []),
+  'lockInGoal' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'submitDailyCheckIn' : IDL.Func(
       [IDL.Nat, IDL.Vec(Task), IDL.Vec(Task)],
@@ -298,7 +298,7 @@ export const idlFactory = ({ IDL }) => {
     'goalExists' : IDL.Func([IDL.Nat], [IDL.Bool], ['query']),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'isGoalLockedIn' : IDL.Func([IDL.Nat], [IDL.Bool], ['query']),
-    'lockInGoal' : IDL.Func([IDL.Nat], [], []),
+    'lockInGoal' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'submitDailyCheckIn' : IDL.Func(
         [IDL.Nat, IDL.Vec(Task), IDL.Vec(Task)],

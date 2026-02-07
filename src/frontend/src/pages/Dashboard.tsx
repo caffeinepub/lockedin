@@ -11,6 +11,7 @@ import DashboardHome from '../components/DashboardHome';
 import SettingsPanel from '../components/SettingsPanel';
 import WeeklyPlanDashboard from '../components/WeeklyPlan/WeeklyPlanDashboard';
 import AutoPlannerView from '../components/AutoPlanner/AutoPlannerView';
+import DailyCheckIn from '../components/DailyCheckIn';
 
 type Section = 'home' | 'goals' | 'milestones' | 'daily' | 'weekly' | 'analytics' | 'settings' | 'autoPlanner';
 
@@ -44,6 +45,11 @@ export default function Dashboard() {
   const handleGoalDeleted = () => {
     setSelectedGoalId(null);
     setActiveSection('goals');
+  };
+
+  const handleCheckInGoal = (goalId: bigint) => {
+    setSelectedGoalId(goalId);
+    setActiveSection('daily');
   };
 
   const MenuContent = () => (
@@ -127,7 +133,7 @@ export default function Dashboard() {
             )}
 
             {activeSection === 'home' && (
-              <DashboardHome onNavigate={handleMenuItemClick} />
+              <DashboardHome onNavigate={handleMenuItemClick} onCheckInGoal={handleCheckInGoal} />
             )}
 
             {activeSection === 'autoPlanner' && (
@@ -148,9 +154,13 @@ export default function Dashboard() {
               </div>
             )}
 
-            {activeSection === 'daily' && (
+            {activeSection === 'daily' && selectedGoalId && (
+              <DailyCheckIn goalId={selectedGoalId} />
+            )}
+
+            {activeSection === 'daily' && !selectedGoalId && (
               <div className="text-center py-12 text-muted-foreground">
-                Daily tasks view - Coming soon
+                Select a goal from Home to check in on your daily tasks
               </div>
             )}
 

@@ -365,9 +365,9 @@ export default function PlanningPhase({ goalId }: PlanningPhaseProps) {
               <Button
                 onClick={handleLockIn}
                 disabled={lockInGoal.isPending}
-                className="flex-1 bg-brand hover:bg-brand/90 text-brand-foreground"
+                className="flex-1 bg-brand hover:bg-brand/90 text-white"
               >
-                {lockInGoal.isPending ? 'Locking...' : 'Lock It In'}
+                {lockInGoal.isPending ? 'Locking In...' : 'Lock It In'}
               </Button>
             </div>
           </div>
