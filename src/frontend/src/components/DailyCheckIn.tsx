@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   useGetDailyTasks,
   useSubmitDailyCheckIn,
@@ -16,10 +16,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Calendar } from 'lucide-react';
+import { Calendar, CheckCircle2 } from 'lucide-react';
 import type { Task } from '../backend';
 import { Type } from '../backend';
-import { formatBackendDate } from '../utils/dates';
+import { formatBackendDate, getUTCDayKey, getCurrentUTCDayKey } from '../utils/dates';
 
 interface DailyCheckInProps {
   goalId: bigint;
@@ -32,6 +32,15 @@ export default function DailyCheckIn({ goalId }: DailyCheckInProps) {
 
   const [completedTaskIds, setCompletedTaskIds] = useState<Set<number>>(new Set());
   const [missedReasons, setMissedReasons] = useState<Map<number, Type>>(new Map());
+
+  // Check if user has already checked in today
+  const hasCheckedInToday = useMemo(() => {
+    const todayKey = getCurrentUTCDayKey();
+    return checkIns.some((checkIn) => {
+      const checkInDayKey = getUTCDayKey(checkIn.date);
+      return checkInDayKey === todayKey;
+    });
+  }, [checkIns]);
 
   const handleToggleTask = (index: number) => {
     const newSet = new Set(completedTaskIds);
@@ -53,6 +62,10 @@ export default function DailyCheckIn({ goalId }: DailyCheckInProps) {
   };
 
   const handleSubmit = () => {
+    if (hasCheckedInToday) {
+      return; // Prevent submission if already checked in today
+    }
+
     const completed: Task[] = [];
     const missed: Task[] = [];
 
@@ -105,6 +118,16 @@ export default function DailyCheckIn({ goalId }: DailyCheckInProps) {
                 No daily tasks defined yet. Complete your planning phase first.
               </p>
             </div>
+          ) : hasCheckedInToday ? (
+            <div className="text-center py-8 space-y-4">
+              <CheckCircle2 className="w-16 h-16 mx-auto text-brand" />
+              <div className="space-y-2">
+                <p className="text-lg font-medium">You have already checked in today</p>
+                <p className="text-muted-foreground">
+                  Come back tomorrow to check in again and keep your streak going!
+                </p>
+              </div>
+            </div>
           ) : (
             <>
               <div className="space-y-4">
@@ -152,7 +175,7 @@ export default function DailyCheckIn({ goalId }: DailyCheckInProps) {
               </div>
               <Button
                 onClick={handleSubmit}
-                disabled={!allTasksReviewed || submitCheckIn.isPending}
+                disabled={!allTasksReviewed || submitCheckIn.isPending || hasCheckedInToday}
                 className="w-full"
               >
                 {submitCheckIn.isPending ? 'Submitting...' : 'Submit Check-In'}

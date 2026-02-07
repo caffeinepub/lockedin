@@ -2,7 +2,7 @@ import { useGetGoals } from '../../hooks/useQueries';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Lock, Sparkles, CheckCircle } from 'lucide-react';
-import CheckInTicker from './CheckInTicker';
+import CheckInTicker, { CheckInStats } from './CheckInTicker';
 
 interface LockedInGoalsSectionProps {
   onNavigate: (section: 'autoPlanner') => void;
@@ -66,15 +66,19 @@ export default function LockedInGoalsSection({ onNavigate, onCheckInGoal }: Lock
                 {goal.description}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3">
               <CheckInTicker goalId={goal.id} />
-              <Button
-                onClick={() => onCheckInGoal(goal.id)}
-                className="w-full h-7 py-1 px-3 text-xs bg-brand hover:bg-brand/90 text-brand-foreground"
-              >
-                <CheckCircle className="h-3 w-3 mr-1.5" />
-                Check in
-              </Button>
+              <div className="flex items-start justify-between gap-3">
+                <CheckInStats goalId={goal.id} />
+                <Button
+                  onClick={() => onCheckInGoal(goal.id)}
+                  size="sm"
+                  className="shrink-0 bg-brand hover:bg-brand/90 text-brand-foreground"
+                >
+                  <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
+                  Check in
+                </Button>
+              </div>
             </CardContent>
           </Card>
         ))}

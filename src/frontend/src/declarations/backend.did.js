@@ -69,7 +69,9 @@ export const Goal = IDL.Record({
 });
 export const UserDataView = IDL.Record({
   'weeklyPlans' : IDL.Vec(IDL.Tuple(IDL.Nat, WeeklyPlan)),
-  'dailyCheckIns' : IDL.Vec(DailyCheckIn),
+  'dailyCheckIns' : IDL.Vec(
+    IDL.Tuple(IDL.Nat, IDL.Vec(IDL.Tuple(IDL.Int, DailyCheckIn)))
+  ),
   'weeklyReviews' : IDL.Vec(WeeklyReview),
   'goalProgress' : IDL.Vec(IDL.Tuple(IDL.Nat, GoalProgress)),
   'goals' : IDL.Vec(IDL.Tuple(IDL.Nat, Goal)),
@@ -113,10 +115,14 @@ export const idlService = IDL.Service({
     ),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
-  'getDailyCheckIns' : IDL.Func([], [IDL.Vec(DailyCheckIn)], ['query']),
+  'getDailyCheckIns' : IDL.Func(
+      [],
+      [IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Vec(IDL.Tuple(IDL.Int, DailyCheckIn))))],
+      ['query'],
+    ),
   'getDailyCheckInsByGoal' : IDL.Func(
       [IDL.Nat],
-      [IDL.Vec(DailyCheckIn)],
+      [IDL.Vec(IDL.Tuple(IDL.Int, DailyCheckIn))],
       ['query'],
     ),
   'getDailyTasks' : IDL.Func([IDL.Nat], [IDL.Vec(Task)], ['query']),
@@ -225,7 +231,9 @@ export const idlFactory = ({ IDL }) => {
   });
   const UserDataView = IDL.Record({
     'weeklyPlans' : IDL.Vec(IDL.Tuple(IDL.Nat, WeeklyPlan)),
-    'dailyCheckIns' : IDL.Vec(DailyCheckIn),
+    'dailyCheckIns' : IDL.Vec(
+      IDL.Tuple(IDL.Nat, IDL.Vec(IDL.Tuple(IDL.Int, DailyCheckIn)))
+    ),
     'weeklyReviews' : IDL.Vec(WeeklyReview),
     'goalProgress' : IDL.Vec(IDL.Tuple(IDL.Nat, GoalProgress)),
     'goals' : IDL.Vec(IDL.Tuple(IDL.Nat, Goal)),
@@ -266,10 +274,18 @@ export const idlFactory = ({ IDL }) => {
       ),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
-    'getDailyCheckIns' : IDL.Func([], [IDL.Vec(DailyCheckIn)], ['query']),
+    'getDailyCheckIns' : IDL.Func(
+        [],
+        [
+          IDL.Vec(
+            IDL.Tuple(IDL.Nat, IDL.Vec(IDL.Tuple(IDL.Int, DailyCheckIn)))
+          ),
+        ],
+        ['query'],
+      ),
     'getDailyCheckInsByGoal' : IDL.Func(
         [IDL.Nat],
-        [IDL.Vec(DailyCheckIn)],
+        [IDL.Vec(IDL.Tuple(IDL.Int, DailyCheckIn))],
         ['query'],
       ),
     'getDailyTasks' : IDL.Func([IDL.Nat], [IDL.Vec(Task)], ['query']),

@@ -1,46 +1,24 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-07T00:32:37.156Z",
-  "summary": "REQ-2 shows partial implementation in AutoPlannerReview.tsx (actor readiness check, missing-method guard for custom duration, isSaving state, step-wise try/catch with readable error wrapping, and goal verification). However, REQ-1 backend work is not evidenced at all, and the diff is truncated before showing the rest of the save sequence (milestones/tasks/lock-in), success handling (toast + onSaveComplete), and guaranteed isSaving reset/disabled button behavior.",
+  "generatedAt": "2026-02-07T08:02:24.697Z",
+  "summary": "Locked-in Goals cards were updated to place a smaller \"Check in\" button on the same row as the stats, with the ticker remaining above. However, the requested refactor to avoid duplicating stats logic was not fully achieved: stats computation and data fetching are duplicated between the ticker and the new stats component.",
   "missing_requirements": [
     {
-      "id": "REQ-1",
-      "requirement": "Implement backend canister method `createGoalWithCustomDuration(description, timeFrame, motivation, durationDays)` in `backend/main.mo`, with same authorization as `createGoal`, persisting durationDays and returning new goal id.",
-      "reason": "No backend file changes are shown; `backend/main.mo` is not modified in the diff summary, so there is no evidence the method was added or that durationDays is persisted.",
-      "evidence": [
-        "File diff summary lists modified files: only frontend/src/components/AutoPlanner/AutoPlannerReview.tsx, frontend-file-summaries.txt, project_state.json (no backend/main.mo)"
-      ]
-    },
-    {
       "id": "REQ-2",
-      "requirement": "Auto Planner “Save & Lock In” performs the full save sequence (create goal, add milestones/weekly tasks/daily tasks, lock in goal) and on success shows a success toast and calls `onSaveComplete()`; on any failure shows error toast and resets `isSaving`; button remains disabled during save.",
-      "reason": "AutoPlannerReview.tsx is truncated before showing milestones/tasks/lock-in steps and the final success/failure UI state handling. The visible portion sets `setIsSaving(true)` but does not show any `finally`/reset, success toast, `onSaveComplete()` call, or button disabled binding.",
+      "requirement": "Refactor the CheckInTicker component rendering so that the stats block can be positioned in the same row as the \"Check in\" button within the Locked-in Goals card without duplicating stats logic.",
+      "reason": "The diff introduces a separate `CheckInStats` component, but it repeats the same data fetching (`useGetDailyCheckInsByGoal`, `useGetGoal`) and recomputes stats (`computeCheckInStats`) independently from `CheckInTicker`, which still performs its own fetch+compute for rendering the ticker bars. This duplicates stats logic rather than refactoring it into a shared structure.",
       "evidence": [
-        "frontend/src/components/AutoPlanner/AutoPlannerReview.tsx (truncated): shows actor check, missing-method guard, `setIsSaving(true)`, goal creation + verification; truncates at \"// Step 3: Add milestones...\" before rest of sequence and any completion/reset logic"
+        "frontend/src/components/lockedIn/CheckInTicker.tsx"
       ]
     }
   ],
-  "hallucinated_features": [
-    {
-      "description": "Updates to project tracking metadata (project_state.json) marking requests as pending/new project state.",
-      "reason": "BuildRequest only asks for backend + frontend functional fixes; it does not request updates to project metadata/state files.",
-      "evidence": [
-        "project_state.json"
-      ]
-    },
-    {
-      "description": "Large-scale unrelated frontend feature/documentation summary updates (e.g., footer attribution/version text, theme/toaster styling, dashboard behavior, etc.).",
-      "reason": "These items are not part of the requested fix for Auto Planner save/lock-in or the backend method; they appear as unrelated changes in the modified frontend-file-summaries.txt.",
-      "evidence": [
-        "frontend-file-summaries.txt (truncated)"
-      ]
-    }
-  ],
-  "confidence": 0.68,
+  "hallucinated_features": [],
+  "confidence": 0.74,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/components/AutoPlanner/AutoPlannerReview.tsx",
+    "frontend/src/components/lockedIn/CheckInTicker.tsx",
+    "frontend/src/components/lockedIn/LockedInGoalsSection.tsx",
     "project_state.json"
   ]
 }

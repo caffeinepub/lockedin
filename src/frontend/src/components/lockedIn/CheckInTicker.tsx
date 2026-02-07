@@ -19,49 +19,65 @@ export default function CheckInTicker({ goalId }: CheckInTickerProps) {
   }
 
   const stats = computeCheckInStats(checkIns, goal?.createdAt);
-  const daysShown = stats.last7Days.length;
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-1">
-        {stats.last7Days.map((day, index) => {
-          if (day.hasCheckIn) {
-            const completionRate = day.completedTasks / (day.completedTasks + day.missedTasks);
-            const isGood = completionRate >= 0.7;
-            return (
-              <div
-                key={index}
-                className="flex-1 h-8 rounded flex items-center justify-center"
-                style={{
-                  backgroundColor: isGood ? 'oklch(0.7 0.15 142)' : 'oklch(0.6 0.15 30)',
-                }}
-                title={`${day.completedTasks} completed, ${day.missedTasks} missed`}
-              >
-                {isGood ? (
-                  <CheckCircle2 className="h-4 w-4 text-white" />
-                ) : (
-                  <XCircle className="h-4 w-4 text-white" />
-                )}
-              </div>
-            );
-          }
+    <div className="flex items-center gap-1">
+      {stats.last7Days.map((day, index) => {
+        if (day.hasCheckIn) {
+          const completionRate = day.completedTasks / (day.completedTasks + day.missedTasks);
+          const isGood = completionRate >= 0.7;
           return (
             <div
               key={index}
-              className="flex-1 h-8 rounded flex items-center justify-center bg-muted"
-              title="No check-in"
+              className="flex-1 h-8 rounded flex items-center justify-center"
+              style={{
+                backgroundColor: isGood ? 'oklch(0.7 0.15 142)' : 'oklch(0.6 0.15 30)',
+              }}
+              title={`${day.completedTasks} completed, ${day.missedTasks} missed`}
             >
-              <Circle className="h-4 w-4 text-muted-foreground" />
+              {isGood ? (
+                <CheckCircle2 className="h-4 w-4 text-white" />
+              ) : (
+                <XCircle className="h-4 w-4 text-white" />
+              )}
             </div>
           );
-        })}
-      </div>
-      <div className="text-xs text-muted-foreground space-y-1">
-        <p>Last {daysShown} {daysShown === 1 ? 'day' : 'days'} • {stats.checkInCount} check-ins</p>
-        {stats.checkInCount > 0 && (
-          <p>Completion rate: {Math.round(stats.completionRate * 100)}%</p>
-        )}
-      </div>
+        }
+        return (
+          <div
+            key={index}
+            className="flex-1 h-8 rounded flex items-center justify-center bg-muted"
+            title="No check-in"
+          >
+            <Circle className="h-4 w-4 text-muted-foreground" />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+interface CheckInStatsProps {
+  goalId: bigint;
+}
+
+export function CheckInStats({ goalId }: CheckInStatsProps) {
+  const { data: checkIns = [], isLoading: checkInsLoading } = useGetDailyCheckInsByGoal(goalId);
+  const { data: goal, isLoading: goalLoading } = useGetGoal(goalId);
+
+  if (checkInsLoading || goalLoading) {
+    return null;
+  }
+
+  const stats = computeCheckInStats(checkIns, goal?.createdAt);
+  const daysShown = stats.last7Days.length;
+
+  return (
+    <div className="text-xs text-muted-foreground space-y-1">
+      <p>Last {daysShown} {daysShown === 1 ? 'day' : 'days'} • {stats.checkInCount} check-ins</p>
+      {stats.checkInCount > 0 && (
+        <p>Completion rate: {Math.round(stats.completionRate * 100)}%</p>
+      )}
     </div>
   );
 }

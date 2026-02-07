@@ -6,8 +6,10 @@ import Principal "mo:core/Principal";
 import Time "mo:core/Time";
 import Iter "mo:core/Iter";
 
+
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
+
 
 actor {
   let accessControlState = AccessControl.initState();
@@ -88,7 +90,7 @@ actor {
   public type UserData = {
     goals : Map.Map<Nat, Goal>;
     goalProgress : Map.Map<Nat, GoalProgress>;
-    dailyCheckIns : List.List<DailyCheckIn>;
+    dailyCheckIns : Map.Map<Nat, Map.Map<Int, DailyCheckIn>>;
     weeklyReviews : List.List<WeeklyReview>;
     weeklyPlans : Map.Map<Nat, WeeklyPlan>;
   };
@@ -96,7 +98,7 @@ actor {
   public type UserDataView = {
     goals : [(Nat, Goal)];
     goalProgress : [(Nat, GoalProgress)];
-    dailyCheckIns : [DailyCheckIn];
+    dailyCheckIns : [(Nat, [(Int, DailyCheckIn)])];
     weeklyReviews : [WeeklyReview];
     weeklyPlans : [(Nat, WeeklyPlan)];
   };
@@ -347,25 +349,60 @@ actor {
       Runtime.trap("Unauthorized: Goal does not belong to caller");
     };
 
-    let checkIn : DailyCheckIn = {
-      goalId;
-      date = getCurrentTimestamp();
-      completedTasks;
-      missedTasks;
+    let today = getCurrentDay();
+    let goalCheckIns = userGoals.dailyCheckIns.get(goalId);
+
+    switch (goalCheckIns) {
+      case (null) {
+        let dailyCheckIn = {
+          goalId;
+          date = getCurrentTimestamp();
+          completedTasks;
+          missedTasks;
+        };
+        let newGoalCheckIns = Map.empty<Int, DailyCheckIn>();
+        newGoalCheckIns.add(today, dailyCheckIn);
+        userGoals.dailyCheckIns.add(goalId, newGoalCheckIns);
+      };
+      case (?checkIns) {
+        let existingCheckIn = checkIns.get(today);
+
+        switch (existingCheckIn) {
+          case (?_) {
+            Runtime.trap("Check-in already exists for today");
+          };
+          case (null) {
+            let dailyCheckIn = {
+              goalId;
+              date = getCurrentTimestamp();
+              completedTasks;
+              missedTasks;
+            };
+            checkIns.add(today, dailyCheckIn);
+          };
+        };
+      };
     };
 
-    userGoals.dailyCheckIns.add(checkIn);
     userData.add(caller, userGoals);
   };
 
-  public query ({ caller }) func getDailyCheckIns() : async [DailyCheckIn] {
+  public query ({ caller }) func getDailyCheckIns() : async [(Nat, [(Int, DailyCheckIn)])] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can access daily check-ins");
     };
-    getUserGoals(caller).dailyCheckIns.toArray();
+
+    let userGoals = getUserGoals(caller);
+    let result = userGoals.dailyCheckIns.toArray();
+    result.map<(Nat, Map.Map<Int, DailyCheckIn>), (Nat, [(Int, DailyCheckIn)])>(
+      func((goalId, checkInMap)) {
+        let checkIns = checkInMap.toArray();
+        (goalId, checkIns);
+      }
+    );
   };
 
-  public query ({ caller }) func getDailyCheckInsByGoal(goalId : Nat) : async [DailyCheckIn] {
+  public query ({ caller }) func getDailyCheckInsByGoal(goalId : Nat) : async [(Int, DailyCheckIn)] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can access daily check-ins");
     };
@@ -375,8 +412,10 @@ actor {
       Runtime.trap("Unauthorized: Goal does not belong to caller");
     };
 
-    let checkIns = userGoals.dailyCheckIns.toArray();
-    checkIns.filter(func(checkIn) { checkIn.goalId == goalId });
+    switch (userGoals.dailyCheckIns.get(goalId)) {
+      case (null) { [] };
+      case (?checkIns) { checkIns.toArray() };
+    };
   };
 
   public shared ({ caller }) func submitWeeklyReview(goalId : Nat, plannedTasks : [Task], completedTasks : [Task], progressSummary : Text) : async () {
@@ -453,7 +492,12 @@ actor {
         (principal, {
           goals = goalsArray;
           goalProgress = goalProgressArray;
-          dailyCheckIns = dailyCheckInsArray;
+          dailyCheckIns = dailyCheckInsArray.map<(Nat, Map.Map<Int, DailyCheckIn>), (Nat, [(Int, DailyCheckIn)])>(
+            func((goalId, checkInMap)) {
+              let checkIns = checkInMap.toArray();
+              (goalId, checkIns);
+            }
+          );
           weeklyReviews = weeklyReviewsArray;
           weeklyPlans = weeklyPlansArray;
         });
@@ -550,13 +594,19 @@ actor {
     Time.now();
   };
 
+  func getCurrentDay() : Int {
+    let millisSinceEpoch = (Time.now() / 1_000_000);
+    let daysSinceEpoch = millisSinceEpoch / 86_400_000;
+    daysSinceEpoch;
+  };
+
   func getUserGoals(caller : Principal) : UserData {
     switch (userData.get(caller)) {
       case (null) {
         let newUserData : UserData = {
           goals = Map.empty<Nat, Goal>();
           goalProgress = Map.empty<Nat, GoalProgress>();
-          dailyCheckIns = List.empty<DailyCheckIn>();
+          dailyCheckIns = Map.empty<Nat, Map.Map<Int, DailyCheckIn>>();
           weeklyReviews = List.empty<WeeklyReview>();
           weeklyPlans = Map.empty<Nat, WeeklyPlan>();
         };
@@ -608,12 +658,7 @@ actor {
     userGoals.goalProgress.remove(goalId);
     userGoals.weeklyPlans.remove(goalId);
 
-    let dailyCheckInsIter = userGoals.dailyCheckIns.values();
-    let filteredDailyCheckInsIter = dailyCheckInsIter.filter(func(checkIn) { checkIn.goalId != goalId });
-    userGoals.dailyCheckIns.clear();
-    for (checkIn in filteredDailyCheckInsIter) {
-      userGoals.dailyCheckIns.add(checkIn);
-    };
+    userGoals.dailyCheckIns.remove(goalId);
 
     let weeklyReviewsIter = userGoals.weeklyReviews.values();
     let filteredWeeklyReviewsIter = weeklyReviewsIter.filter(func(review) { review.goalId != goalId });

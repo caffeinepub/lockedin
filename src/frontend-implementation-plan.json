@@ -1,22 +1,53 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix Auto Planner “Save & Lock In” reliability and feedback",
+  "title": "Locked-in Goals card: align smaller Check in button with stats row",
   "requirements": [
     {
-      "id": "REQ-2",
-      "summary": "Make Auto Planner “Save & Lock In” run the full save sequence reliably with clear success/error feedback and proper loading/disable behavior.",
+      "id": "REQ-1",
+      "summary": "Adjust Locked-in Goals card layout so the Check in button is smaller and right-aligned on the same row as the stats text beneath the ticker.",
       "acceptanceCriteria": [
-        "Clicking “Save & Lock In” in `frontend/src/components/AutoPlanner/AutoPlannerReview.tsx` performs the full save sequence without throwing a missing-method/actor error.",
-        "When the save succeeds, a success toast is shown and `onSaveComplete()` is called, and the created goal appears in the goals list as locked in.",
-        "When any step fails (create goal, add milestones/tasks, lock in), the UI shows an error toast with a readable message and the button returns to an enabled non-loading state (i.e., `isSaving` is reset).",
-        "The button remains disabled while a save is in progress to prevent double-submission."
+        "On each Locked-in Goals card, the 7-day ticker bars remain visible above the stats/button row.",
+        "The stats text (\"Last … days • … check-ins\" and, when applicable, \"Completion rate: …%\") is left-aligned (or start-aligned) and the \"Check in\" button is right-aligned on the same row.",
+        "The \"Check in\" button is visually smaller than the current full-width button (no longer spans the full card width) while preserving its label, icon, and click behavior (still triggers the same onCheckInGoal for that goal).",
+        "The layout remains responsive on narrow widths (button and stats do not overlap; if wrapping is necessary, it remains readable and the button stays associated with the stats row)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/AutoPlanner/AutoPlannerReview.tsx",
+          "path": "frontend/src/components/lockedIn/LockedInGoalsSection.tsx",
           "operation": "modify",
-          "description": "Refactor the “Save & Lock In” handler into an explicit, step-labeled async sequence using the existing actor connection. Add a runtime check that `createGoalWithCustomDuration` exists before calling it (otherwise show a readable error toast and abort) to avoid missing-method errors. Ensure per-step failure produces a clear error toast (including which step failed), and always reset `isSaving` in a `finally` block so the button re-enables. Keep the button disabled while saving to prevent double submission. After success, trigger React Query cache refresh (e.g., invalidate goals/goal queries) so the new locked-in goal appears reliably, then show a success toast and call `onSaveComplete()`. Verify the component's usage instructions before implementing."
+          "description": "Update the locked-in goal card markup to render the ticker bars above a new flex row containing (left) the stats block and (right) a smaller, non-full-width \"Check in\" button; ensure responsive wrapping/spacing so stats and button remain readable on narrow widths while preserving the existing onCheckInGoal(goal.id) click behavior."
+        },
+        {
+          "path": "frontend/src/components/lockedIn/CheckInTicker.tsx",
+          "operation": "modify",
+          "description": "Adapt CheckInTicker exports/structure (in coordination with REQ-2) so LockedInGoalsSection can render the ticker bars separately from the stats block, enabling placement of the stats next to the button while keeping the ticker visually above."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Refactor CheckInTicker so the stats block can be reused and positioned alongside the Check in button without duplicating stats logic or changing displayed values.",
+      "acceptanceCriteria": [
+        "The stats values displayed (days shown, check-in count, completion rate rounding) remain consistent with the current behavior.",
+        "The Locked-in Goals card uses the refactored structure so the stats appear next to the button on the same row.",
+        "No regressions: the ticker still correctly shows check-in days vs no check-in days and the existing loading state remains functional."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/lockedIn/useCheckInTickerData.ts",
+          "operation": "create",
+          "description": "Create a shared hook that encapsulates CheckInTicker's existing data fetching (goal + daily check-ins) and stats computation (via computeCheckInStats) and returns loading state plus derived stats needed for both ticker rendering and the stats block, avoiding duplicated logic."
+        },
+        {
+          "path": "frontend/src/components/lockedIn/CheckInTicker.tsx",
+          "operation": "modify",
+          "description": "Refactor CheckInTicker to use the new shared hook and to expose reusable rendering pieces (e.g., a ticker-bars renderer and a stats-block renderer) so LockedInGoalsSection can compose bars + (stats + button) row without changing the stats calculations, ticker semantics, or loading behavior."
+        },
+        {
+          "path": "frontend/src/components/lockedIn/LockedInGoalsSection.tsx",
+          "operation": "modify",
+          "description": "Wire the refactored CheckInTicker pieces (and/or shared hook) into the Locked-in Goals cards so the stats block is rendered in the same row as the smaller right-aligned button, with no duplication of stats logic and no regression to the ticker/loading state."
         }
       ]
     }

@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { useGetCallerUserProfile } from '../hooks/useQueries';
 import { Button } from '@/components/ui/button';
-import { Target, Calendar, TrendingUp, CheckSquare, BarChart3, Settings, ChevronDown, Sparkles } from 'lucide-react';
+import { Target, Calendar, TrendingUp, CheckSquare, BarChart3, Settings, Sparkles } from 'lucide-react';
 import LockedInGoalsSection from './lockedIn/LockedInGoalsSection';
 
 type Section = 'goals' | 'milestones' | 'daily' | 'weekly' | 'analytics' | 'settings' | 'autoPlanner';
@@ -57,7 +57,6 @@ export default function DashboardHome({ onNavigate, onCheckInGoal }: DashboardHo
             className="bg-brand hover:bg-brand/90 text-brand-foreground font-semibold text-lg px-12 py-6 rounded-full shadow-lg hover:shadow-xl transition-all"
           >
             PROCEED
-            <ChevronDown className="ml-2 h-5 w-5" />
           </Button>
         </div>
       </div>

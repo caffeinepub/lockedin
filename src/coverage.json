@@ -1,31 +1,40 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-07T00:32:37.159Z",
+  "generatedAt": "2026-02-07T08:02:24.699Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
     "total": 2,
-    "implemented": 1,
+    "implemented": 2,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Implement a backend canister method `createGoalWithCustomDuration(description, timeFrame, motivation, durationDays)` that creates a goal with `durationDays` persisted (non-zero) and returns the new goal id, so the Auto Planner flow can save plans that specify a custom duration.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
+        "summary": "Update the Locked-in Goals goal card layout so the \"Check in\" button is smaller and appears on the same horizontal line opposite the stats text (the line(s) showing \"Last X days • Y check-ins\" and \"Completion rate: Z%\"), instead of being full-width below the ticker.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/lockedIn/LockedInGoalsSection.tsx",
+          "frontend/src/components/lockedIn/CheckInTicker.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/lockedIn/LockedInGoalsSection.tsx",
+          "frontend/src/components/lockedIn/CheckInTicker.tsx"
+        ]
       },
       {
         "id": "REQ-2",
-        "summary": "Fix the Auto Planner “Save & Lock In” flow to reliably create the goal, add milestones/weekly tasks/daily tasks, and lock in the goal, with clear user feedback when any step fails.",
+        "summary": "Refactor the CheckInTicker component rendering so that the stats block (\"Last X days • Y check-ins\" and optional \"Completion rate\") can be positioned in the same row as the \"Check in\" button within the Locked-in Goals card without duplicating stats logic.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/AutoPlanner/AutoPlannerReview.tsx"
+          "frontend/src/components/lockedIn/useCheckInTickerData.ts",
+          "frontend/src/components/lockedIn/CheckInTicker.tsx",
+          "frontend/src/components/lockedIn/LockedInGoalsSection.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/AutoPlanner/AutoPlannerReview.tsx"
+          "frontend/src/components/lockedIn/CheckInTicker.tsx",
+          "frontend/src/components/lockedIn/LockedInGoalsSection.tsx"
         ]
       }
     ]
@@ -35,7 +44,8 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/AutoPlanner/AutoPlannerReview.tsx",
+    "frontend/src/components/lockedIn/CheckInTicker.tsx",
+    "frontend/src/components/lockedIn/LockedInGoalsSection.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

@@ -47,7 +47,7 @@ export type Type__1 = { 'months6to12' : null } |
   { 'years1to5' : null };
 export interface UserDataView {
   'weeklyPlans' : Array<[bigint, WeeklyPlan]>,
-  'dailyCheckIns' : Array<DailyCheckIn>,
+  'dailyCheckIns' : Array<[bigint, Array<[bigint, DailyCheckIn]>]>,
   'weeklyReviews' : Array<WeeklyReview>,
   'goalProgress' : Array<[bigint, GoalProgress]>,
   'goals' : Array<[bigint, Goal]>,
@@ -88,8 +88,14 @@ export interface _SERVICE {
   >,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
-  'getDailyCheckIns' : ActorMethod<[], Array<DailyCheckIn>>,
-  'getDailyCheckInsByGoal' : ActorMethod<[bigint], Array<DailyCheckIn>>,
+  'getDailyCheckIns' : ActorMethod<
+    [],
+    Array<[bigint, Array<[bigint, DailyCheckIn]>]>
+  >,
+  'getDailyCheckInsByGoal' : ActorMethod<
+    [bigint],
+    Array<[bigint, DailyCheckIn]>
+  >,
   'getDailyTasks' : ActorMethod<[bigint], Array<Task>>,
   'getGoal' : ActorMethod<[bigint], [] | [Goal]>,
   'getGoalDuration' : ActorMethod<[bigint], [] | [bigint]>,

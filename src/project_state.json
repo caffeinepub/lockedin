@@ -3,14 +3,20 @@
   "projectStateVersion": 3,
   "summary": "New project",
   "architectural_notes": [],
-  "known_issues": [
-    "\"Save and lock in\" button is not working (reported by user)."
-  ],
-  "isFixRequest": true,
+  "known_issues": [],
+  "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-fix-the-auto-planner-save-lock-in-flow-to-reliably-create-the-goal-add-milestones-weekly-tasks-daily-tasks-and-lock-in-the-goal-with-clear-user-feedback-when-any-step-fails",
-      "title": "Fix the Auto Planner “Save & Lock In” flow to reliably create the goal, add milestones/weekly tasks/daily tasks, and lock in the goal, with clear user feedback when any step fails.",
+      "id": "feature-update-the-locked-in-goals-goal-card-layout-so-the-check-in-button-is-smaller-and-appears-on-the-same-horizontal-line-opposite-the-stats-text-the-line-s-showing-last-x-days-y-check-ins-and-completion-rate-z-instead-of-being-full-width-below-the-ticker",
+      "title": "Update the Locked-in Goals goal card layout so the \"Check in\" button is smaller and appears on the same horizontal line opposite the stats text (the line(s) showing \"Last X days • Y check-ins\" and \"Completion rate: Z%\"), instead of being full-width below the ticker.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-refactor-the-checkinticker-component-rendering-so-that-the-stats-block-last-x-days-y-check-ins-and-optional-completion-rate-can-be-positioned-in-the-same-row-as-the-check-in-button-within-the-locked-in-goals-card-without-duplicating-stats-logic",
+      "title": "Refactor the CheckInTicker component rendering so that the stats block (\"Last X days • Y check-ins\" and optional \"Completion rate\") can be positioned in the same row as the \"Check in\" button within the Locked-in Goals card without duplicating stats logic.",
       "reqIds": [
         "REQ-2"
       ],
@@ -20,14 +26,12 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Implement a backend canister method `createGoalWithCustomDuration(description, timeFrame, motivation, durationDays)` that creates a goal with `durationDays` persisted (non-zero) and returns the new goal id, so the Auto Planner flow can save plans that specify a custom duration.",
-      "reqIds": [
-        "REQ-1"
-      ],
+      "summary": "Adjust homepage (Locked-in Goals) UI: make the Check-in button smaller and place it on the same row opposite the 'last day check-ins' + completion rate line.",
+      "reqIds": [],
       "status": "pending"
     }
   ],
-  "projectName": "Fix non-working “Save & Lock In” button in Auto Planner",
+  "projectName": "Adjust Locked-in Goals check-in button size and align it opposite the stats line",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

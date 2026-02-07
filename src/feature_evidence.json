@@ -2,10 +2,31 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-fix-the-auto-planner-save-lock-in-flow-to-reliably-create-the-goal-add-milestones-weekly-tasks-daily-tasks-and-lock-in-the-goal-with-clear-user-feedback-when-any-step-fails",
-      "featureTitle": "Fix the Auto Planner “Save & Lock In” flow to reliably create the goal, add milestones/weekly tasks/daily tasks, and lock in the goal, with clear user feedback when any step fails.",
+      "featureId": "feature-update-the-locked-in-goals-goal-card-layout-so-the-check-in-button-is-smaller-and-appears-on-the-same-horizontal-line-opposite-the-stats-text-the-line-s-showing-last-x-days-y-check-ins-and-completion-rate-z-instead-of-being-full-width-below-the-ticker",
+      "featureTitle": "Update the Locked-in Goals goal card layout so the \"Check in\" button is smaller and appears on the same horizontal line opposite the stats text (the line(s) showing \"Last X days • Y check-ins\" and \"Completion rate: Z%\"), instead of being full-width below the ticker.",
       "files": [
-        "frontend/src/components/AutoPlanner/AutoPlannerReview.tsx"
+        "frontend/src/components/lockedIn/CheckInTicker.tsx",
+        "frontend/src/components/lockedIn/LockedInGoalsSection.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-refactor-the-checkinticker-component-rendering-so-that-the-stats-block-last-x-days-y-check-ins-and-optional-completion-rate-can-be-positioned-in-the-same-row-as-the-check-in-button-within-the-locked-in-goals-card-without-duplicating-stats-logic",
+      "featureTitle": "Refactor the CheckInTicker component rendering so that the stats block (\"Last X days • Y check-ins\" and optional \"Completion rate\") can be positioned in the same row as the \"Check in\" button within the Locked-in Goals card without duplicating stats logic.",
+      "files": [
+        "frontend/src/components/lockedIn/CheckInTicker.tsx",
+        "frontend/src/components/lockedIn/LockedInGoalsSection.tsx"
       ],
       "components": [
         "authorization@4.0.0",

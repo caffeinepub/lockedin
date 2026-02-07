@@ -54,7 +54,7 @@ export interface UserProfile {
 }
 export interface UserDataView {
     weeklyPlans: Array<[bigint, WeeklyPlan]>;
-    dailyCheckIns: Array<DailyCheckIn>;
+    dailyCheckIns: Array<[bigint, Array<[bigint, DailyCheckIn]>]>;
     weeklyReviews: Array<WeeklyReview>;
     goalProgress: Array<[bigint, GoalProgress]>;
     goals: Array<[bigint, Goal]>;
@@ -90,8 +90,8 @@ export interface backendInterface {
     getAllWeeklyPlans(): Promise<Array<[Principal, Array<[bigint, WeeklyPlan]>]>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
-    getDailyCheckIns(): Promise<Array<DailyCheckIn>>;
-    getDailyCheckInsByGoal(goalId: bigint): Promise<Array<DailyCheckIn>>;
+    getDailyCheckIns(): Promise<Array<[bigint, Array<[bigint, DailyCheckIn]>]>>;
+    getDailyCheckInsByGoal(goalId: bigint): Promise<Array<[bigint, DailyCheckIn]>>;
     getDailyTasks(goalId: bigint): Promise<Array<Task>>;
     getGoal(goalId: bigint): Promise<Goal | null>;
     getGoalDuration(goalId: bigint): Promise<bigint | null>;

@@ -401,7 +401,11 @@ export function useGetDailyCheckIns() {
     queryFn: async () => {
       if (!actor) return [];
       try {
-        return await actor.getDailyCheckIns();
+        const result = await actor.getDailyCheckIns();
+        // Transform from Array<[goalId, Array<[dayKey, DailyCheckIn]>]> to flat DailyCheckIn[]
+        return result.flatMap(([_, checkInTuples]) => 
+          checkInTuples.map(([__, checkIn]) => checkIn)
+        );
       } catch (error) {
         return [];
       }
@@ -418,7 +422,9 @@ export function useGetDailyCheckInsByGoal(goalId: bigint) {
     queryFn: async () => {
       if (!actor) return [];
       try {
-        return await actor.getDailyCheckInsByGoal(goalId);
+        const result = await actor.getDailyCheckInsByGoal(goalId);
+        // Transform from Array<[dayKey, DailyCheckIn]> to DailyCheckIn[]
+        return result.map(([_, checkIn]) => checkIn);
       } catch (error) {
         return [];
       }
@@ -453,7 +459,13 @@ export function useSubmitDailyCheckIn() {
       toast.success("Check-in submitted! You're LockedIn.");
     },
     onError: (error: unknown) => {
-      toast.error(`Failed to submit check-in: ${getErrorMessage(error)}`);
+      const errorMessage = getErrorMessage(error);
+      // Surface backend duplicate-same-day rejection message directly
+      if (errorMessage.includes('already exists for today')) {
+        toast.error(errorMessage);
+      } else {
+        toast.error(`Failed to submit check-in: ${errorMessage}`);
+      }
     },
   });
 }

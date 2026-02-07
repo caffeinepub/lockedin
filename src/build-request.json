@@ -1,53 +1,54 @@
 {
   "kind": "build_request",
-  "title": "Fix non-working “Save & Lock In” button in Auto Planner",
-  "priority": "high",
+  "title": "Adjust Locked-in Goals check-in button size and align it opposite the stats line",
+  "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Implement a backend canister method `createGoalWithCustomDuration(description, timeFrame, motivation, durationDays)` that creates a goal with `durationDays` persisted (non-zero) and returns the new goal id, so the Auto Planner flow can save plans that specify a custom duration.",
-      "target": "backend",
+      "text": "Update the Locked-in Goals goal card layout so the \"Check in\" button is smaller and appears on the same horizontal line opposite the stats text (the line(s) showing \"Last X days • Y check-ins\" and \"Completion rate: Z%\"), instead of being full-width below the ticker.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-3"
+          "msg-4"
         ],
         "quotes": [
-          "the save and lock in button isnt working"
+          "make the check-in button in the homepage (Locked-in Goals) smaller, stack it opposite to the last day check-ins and completion rate line (but on same line)"
         ]
       },
       "acceptanceCriteria": [
-        "`backend/main.mo` exposes `createGoalWithCustomDuration` as a shared method and enforces the same authorization checks as `createGoal`.",
-        "The new goal’s `durationDays` equals the provided `durationDays` argument (Nat) when retrieved via `getGoal`.",
-        "No state migration is required and existing goals are unaffected."
+        "On each Locked-in Goals card, the 7-day ticker bars remain visible above the stats/button row.",
+        "The stats text (\"Last … days • … check-ins\" and, when applicable, \"Completion rate: …%\") is left-aligned (or start-aligned) and the \"Check in\" button is right-aligned on the same row.",
+        "The \"Check in\" button is visually smaller than the current full-width button (no longer spans the full card width) while preserving its label, icon, and click behavior (still triggers the same onCheckInGoal for that goal).",
+        "The layout remains responsive on narrow widths (button and stats do not overlap; if wrapping is necessary, it remains readable and the button stays associated with the stats row)."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Fix the Auto Planner “Save & Lock In” flow to reliably create the goal, add milestones/weekly tasks/daily tasks, and lock in the goal, with clear user feedback when any step fails.",
+      "text": "Refactor the CheckInTicker component rendering so that the stats block (\"Last X days • Y check-ins\" and optional \"Completion rate\") can be positioned in the same row as the \"Check in\" button within the Locked-in Goals card without duplicating stats logic.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-3"
+          "msg-4"
         ],
         "quotes": [
-          "the save and lock in button isnt working"
+          "stack it opposite to the last day check-ins and completion rate line (but on same line)"
         ]
       },
       "acceptanceCriteria": [
-        "Clicking “Save & Lock In” in `frontend/src/components/AutoPlanner/AutoPlannerReview.tsx` performs the full save sequence without throwing a missing-method/actor error.",
-        "When the save succeeds, a success toast is shown and `onSaveComplete()` is called, and the created goal appears in the goals list as locked in.",
-        "When any step fails (create goal, add milestones/tasks, lock in), the UI shows an error toast with a readable message and the button returns to an enabled non-loading state (i.e., `isSaving` is reset).",
-        "The button remains disabled while a save is in progress to prevent double-submission."
+        "The stats values displayed (days shown, check-in count, completion rate rounding) remain consistent with the current behavior.",
+        "The Locked-in Goals card uses the refactored structure so the stats appear next to the button on the same row.",
+        "No regressions: the ticker still correctly shows check-in days vs no check-in days and the existing loading state remains functional."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single-actor Motoko canister (all logic in `backend/main.mo`).",
-    "Do not edit any files under `frontend/src/components/ui` or other immutable frontend paths listed in SYSTEM_CONTEXT."
+    "Do not change any backend canister logic or data models; this is a UI/layout-only adjustment.",
+    "Do not edit files under frontend/src/components/ui or any paths listed as immutable by the system context."
   ],
   "nonGoals": [
-    "Redesigning the Auto Planner UI or changing the planning workflow steps beyond making the save/lock-in action work reliably.",
-    "Adding third-party services, external databases, or non-Internet-Identity authentication."
+    "Changing the text content of the stats lines or the \"Check in\" label.",
+    "Changing the check-in submission flow, validation, or preventing duplicate submissions behavior.",
+    "Changing the Proceed button (previously modified in DashboardHome)."
   ],
   "imageRequirements": {
     "required": [],

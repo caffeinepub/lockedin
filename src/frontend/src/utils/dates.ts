@@ -47,3 +47,32 @@ export function formatRelativeDate(timestamp: bigint): string {
   
   return formatBackendDate(timestamp, { month: 'short', day: 'numeric', year: 'numeric' });
 }
+
+/**
+ * Computes a deterministic UTC day key from a backend nanosecond timestamp.
+ * Returns the number of days since Unix epoch in UTC.
+ */
+export function getUTCDayKey(timestamp: bigint): number {
+  const date = parseBackendTimestamp(timestamp);
+  // Get UTC midnight for this date
+  const utcMidnight = Date.UTC(
+    date.getUTCFullYear(),
+    date.getUTCMonth(),
+    date.getUTCDate()
+  );
+  // Return days since epoch
+  return Math.floor(utcMidnight / (1000 * 60 * 60 * 24));
+}
+
+/**
+ * Returns the current UTC day key (days since Unix epoch in UTC).
+ */
+export function getCurrentUTCDayKey(): number {
+  const now = new Date();
+  const utcMidnight = Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate()
+  );
+  return Math.floor(utcMidnight / (1000 * 60 * 60 * 24));
+}

@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { Plus, Trash2, Save, ArrowLeft } from 'lucide-react';
+import { Plus, Trash2, Save, ArrowLeft, Loader2 } from 'lucide-react';
 import type { GeneratedPlan } from '../../lib/autoPlanner/generatePlan';
 import type { Milestone, Task } from '../../backend';
 import {
@@ -40,7 +40,7 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
     plan.dailyTasks.map((t) => t.desc)
   );
 
-  const { actor } = useActor();
+  const { actor, isFetching: actorInitializing } = useActor();
   const queryClient = useQueryClient();
   const createGoal = useCreateGoal();
   const createGoalWithCustomDuration = useCreateGoalWithCustomDuration();
@@ -186,6 +186,27 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
     weeklyTaskCount: editedWeeklyTasks.filter((t) => t.trim()).length,
     dailyTaskCount: editedDailyTasks.filter((t) => t.trim()).length,
   };
+
+  // Compute button state
+  const isGoalEmpty = !editedGoal.trim();
+  const isActorNotReady = !actor || actorInitializing;
+  const isButtonDisabled = isSaving || isGoalEmpty || isActorNotReady;
+
+  // Determine button text and status message
+  let buttonText = 'Save & Lock In';
+  let statusMessage = '';
+
+  if (isSaving) {
+    buttonText = 'Saving...';
+  } else if (actorInitializing) {
+    buttonText = 'Connecting...';
+    statusMessage = 'Connecting to backend...';
+  } else if (!actor) {
+    buttonText = 'Connecting...';
+    statusMessage = 'Waiting for backend connection...';
+  } else if (isGoalEmpty) {
+    statusMessage = 'Enter a goal description to enable saving.';
+  }
 
   return (
     <Card>
@@ -374,6 +395,16 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
 
         <Separator />
 
+        {/* Status Message */}
+        {statusMessage && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            {(actorInitializing || (!actor && !isSaving)) && (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            )}
+            <span>{statusMessage}</span>
+          </div>
+        )}
+
         {/* Actions */}
         <div className="flex gap-3">
           <Button onClick={onBack} variant="outline" className="flex-1" disabled={isSaving}>
@@ -382,11 +413,19 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
           </Button>
           <Button
             onClick={handleSave}
-            disabled={isSaving || !editedGoal.trim() || !actor}
+            disabled={isButtonDisabled}
             className="flex-1 bg-brand hover:bg-brand/90 text-brand-foreground"
           >
             {isSaving ? (
-              'Saving...'
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : (actorInitializing || !actor) ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Connecting...
+              </>
             ) : (
               <>
                 <Save className="h-4 w-4 mr-2" />
