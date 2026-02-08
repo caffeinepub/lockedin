@@ -79,6 +79,10 @@ export interface _SERVICE {
     [string, Type__1, string, bigint],
     bigint
   >,
+  'createGoalWithProgress' : ActorMethod<
+    [string, Type__1, string, Array<Milestone>, Array<Task>, Array<Task>],
+    bigint
+  >,
   'deleteGoal' : ActorMethod<[bigint], undefined>,
   'getAllUserData' : ActorMethod<[], Array<[Principal, UserDataView]>>,
   'getAllUserGoals' : ActorMethod<[], Array<[Principal, Array<Goal>]>>,

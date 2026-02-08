@@ -167,6 +167,7 @@ export interface backendInterface {
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     createGoal(description: string, timeFrame: Type__1, motivation: string): Promise<bigint>;
     createGoalWithCustomDuration(description: string, timeFrame: Type__1, motivation: string, durationDays: bigint): Promise<bigint>;
+    createGoalWithProgress(description: string, timeFrame: Type__1, motivation: string, milestones: Array<Milestone>, weeklyTasks: Array<Task>, dailyTasks: Array<Task>): Promise<bigint>;
     deleteGoal(goalId: bigint): Promise<void>;
     getAllUserData(): Promise<Array<[Principal, UserDataView]>>;
     getAllUserGoals(): Promise<Array<[Principal, Array<Goal>]>>;
@@ -294,6 +295,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.createGoalWithCustomDuration(arg0, to_candid_Type__1_n11(this._uploadFile, this._downloadFile, arg1), arg2, arg3);
+            return result;
+        }
+    }
+    async createGoalWithProgress(arg0: string, arg1: Type__1, arg2: string, arg3: Array<Milestone>, arg4: Array<Task>, arg5: Array<Task>): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.createGoalWithProgress(arg0, to_candid_Type__1_n11(this._uploadFile, this._downloadFile, arg1), arg2, to_candid_vec_n6(this._uploadFile, this._downloadFile, arg3), to_candid_vec_n1(this._uploadFile, this._downloadFile, arg4), to_candid_vec_n1(this._uploadFile, this._downloadFile, arg5));
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.createGoalWithProgress(arg0, to_candid_Type__1_n11(this._uploadFile, this._downloadFile, arg1), arg2, to_candid_vec_n6(this._uploadFile, this._downloadFile, arg3), to_candid_vec_n1(this._uploadFile, this._downloadFile, arg4), to_candid_vec_n1(this._uploadFile, this._downloadFile, arg5));
             return result;
         }
     }

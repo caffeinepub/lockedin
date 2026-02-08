@@ -1,54 +1,37 @@
 {
   "kind": "build_request",
-  "title": "Adjust Locked-in Goals check-in button size and align it opposite the stats line",
-  "priority": "normal",
+  "title": "Make Welcome Goal Library modal goal list scrollable for new users",
+  "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Update the Locked-in Goals goal card layout so the \"Check in\" button is smaller and appears on the same horizontal line opposite the stats text (the line(s) showing \"Last X days • Y check-ins\" and \"Completion rate: Z%\"), instead of being full-width below the ticker.",
+      "text": "Fix the Welcome Goal Library popup (GoalLibraryModal) so the goal template list is actually scrollable when the modal opens, allowing a newly logged-in user to scroll through and select goals beyond the initially visible items.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "make the check-in button in the homepage (Locked-in Goals) smaller, stack it opposite to the last day check-ins and completion rate line (but on same line)"
+          "When a new user logs in and then the welcome pop-up comes up, the list of goals there, when it shows the first goal on the screen, it doesn't scroll. The user cannot scroll and select other goals. It should be scrollable."
         ]
       },
       "acceptanceCriteria": [
-        "On each Locked-in Goals card, the 7-day ticker bars remain visible above the stats/button row.",
-        "The stats text (\"Last … days • … check-ins\" and, when applicable, \"Completion rate: …%\") is left-aligned (or start-aligned) and the \"Check in\" button is right-aligned on the same row.",
-        "The \"Check in\" button is visually smaller than the current full-width button (no longer spans the full card width) while preserving its label, icon, and click behavior (still triggers the same onCheckInGoal for that goal).",
-        "The layout remains responsive on narrow widths (button and stats do not overlap; if wrapping is necessary, it remains readable and the button stays associated with the stats row)."
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "text": "Refactor the CheckInTicker component rendering so that the stats block (\"Last X days • Y check-ins\" and optional \"Completion rate\") can be positioned in the same row as the \"Check in\" button within the Locked-in Goals card without duplicating stats logic.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "stack it opposite to the last day check-ins and completion rate line (but on same line)"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The stats values displayed (days shown, check-in count, completion rate rounding) remain consistent with the current behavior.",
-        "The Locked-in Goals card uses the refactored structure so the stats appear next to the button on the same row.",
-        "No regressions: the ticker still correctly shows check-in days vs no check-in days and the existing loading state remains functional."
+        "When the GoalLibraryModal opens, the goal list area supports scrolling via mouse wheel/trackpad on desktop.",
+        "On touch devices, the goal list area supports vertical swipe scrolling inside the modal.",
+        "Scrolling does not move the page behind the modal; only the list scrolls.",
+        "Users can scroll to any goal template in the current tab/category and select it (checkbox or card click) without the modal closing unintentionally.",
+        "The modal header/tabs area and footer action buttons remain visible while the list scrolls (i.e., only the list region scrolls)."
       ]
     }
   ],
   "constraints": [
-    "Do not change any backend canister logic or data models; this is a UI/layout-only adjustment.",
-    "Do not edit files under frontend/src/components/ui or any paths listed as immutable by the system context."
+    "Do not edit any files under frontend/src/components/ui (compose and configure existing shadcn components instead).",
+    "Keep the backend unchanged; this is a frontend scroll/interaction fix only."
   ],
   "nonGoals": [
-    "Changing the text content of the stats lines or the \"Check in\" label.",
-    "Changing the check-in submission flow, validation, or preventing duplicate submissions behavior.",
-    "Changing the Proceed button (previously modified in DashboardHome)."
+    "Adding new onboarding steps or changing which modal opens when.",
+    "Changing goal template content or categories.",
+    "Implementing new authentication or profile flows."
   ],
   "imageRequirements": {
     "required": [],

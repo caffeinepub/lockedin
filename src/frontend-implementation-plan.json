@@ -1,53 +1,23 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Locked-in Goals card: align smaller Check in button with stats row",
+  "title": "Make GoalLibraryModal goal list scrollable within the modal",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Adjust Locked-in Goals card layout so the Check in button is smaller and right-aligned on the same row as the stats text beneath the ticker.",
+      "summary": "Adjust GoalLibraryModal layout so only the goal list region scrolls (desktop wheel/trackpad + mobile swipe) while modal header/tabs/footer remain fixed, preventing background page scroll.",
       "acceptanceCriteria": [
-        "On each Locked-in Goals card, the 7-day ticker bars remain visible above the stats/button row.",
-        "The stats text (\"Last … days • … check-ins\" and, when applicable, \"Completion rate: …%\") is left-aligned (or start-aligned) and the \"Check in\" button is right-aligned on the same row.",
-        "The \"Check in\" button is visually smaller than the current full-width button (no longer spans the full card width) while preserving its label, icon, and click behavior (still triggers the same onCheckInGoal for that goal).",
-        "The layout remains responsive on narrow widths (button and stats do not overlap; if wrapping is necessary, it remains readable and the button stays associated with the stats row)."
+        "When the GoalLibraryModal opens, the goal list area supports scrolling via mouse wheel/trackpad on desktop.",
+        "On touch devices, the goal list area supports vertical swipe scrolling inside the modal.",
+        "Scrolling does not move the page behind the modal; only the list scrolls.",
+        "Users can scroll to any goal template in the current tab/category and select it (checkbox or card click) without the modal closing unintentionally.",
+        "The modal header/tabs area and footer action buttons remain visible while the list scrolls (i.e., only the list region scrolls)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/lockedIn/LockedInGoalsSection.tsx",
+          "path": "frontend/src/components/GoalLibraryModal.tsx",
           "operation": "modify",
-          "description": "Update the locked-in goal card markup to render the ticker bars above a new flex row containing (left) the stats block and (right) a smaller, non-full-width \"Check in\" button; ensure responsive wrapping/spacing so stats and button remain readable on narrow widths while preserving the existing onCheckInGoal(goal.id) click behavior."
-        },
-        {
-          "path": "frontend/src/components/lockedIn/CheckInTicker.tsx",
-          "operation": "modify",
-          "description": "Adapt CheckInTicker exports/structure (in coordination with REQ-2) so LockedInGoalsSection can render the ticker bars separately from the stats block, enabling placement of the stats next to the button while keeping the ticker visually above."
-        }
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "summary": "Refactor CheckInTicker so the stats block can be reused and positioned alongside the Check in button without duplicating stats logic or changing displayed values.",
-      "acceptanceCriteria": [
-        "The stats values displayed (days shown, check-in count, completion rate rounding) remain consistent with the current behavior.",
-        "The Locked-in Goals card uses the refactored structure so the stats appear next to the button on the same row.",
-        "No regressions: the ticker still correctly shows check-in days vs no check-in days and the existing loading state remains functional."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/lockedIn/useCheckInTickerData.ts",
-          "operation": "create",
-          "description": "Create a shared hook that encapsulates CheckInTicker's existing data fetching (goal + daily check-ins) and stats computation (via computeCheckInStats) and returns loading state plus derived stats needed for both ticker rendering and the stats block, avoiding duplicated logic."
-        },
-        {
-          "path": "frontend/src/components/lockedIn/CheckInTicker.tsx",
-          "operation": "modify",
-          "description": "Refactor CheckInTicker to use the new shared hook and to expose reusable rendering pieces (e.g., a ticker-bars renderer and a stats-block renderer) so LockedInGoalsSection can compose bars + (stats + button) row without changing the stats calculations, ticker semantics, or loading behavior."
-        },
-        {
-          "path": "frontend/src/components/lockedIn/LockedInGoalsSection.tsx",
-          "operation": "modify",
-          "description": "Wire the refactored CheckInTicker pieces (and/or shared hook) into the Locked-in Goals cards so the stats block is rendered in the same row as the smaller right-aligned button, with no duplication of stats logic and no regression to the ticker/loading state."
+          "description": "Fix modal internal scrolling by ensuring the goal-list container is the only scrollable region: keep DialogContent/Tabs layout as a flex column with proper min-h-0 on scroll parents, replace or reconfigure the current ScrollArea usage so it has a definite constrained height, and apply scroll-chaining prevention (e.g., overscroll containment) so wheel/touch scroll stays within the list and does not scroll the page behind the modal. Also prevent scroll/touch events inside the list from propagating to the dialog overlay and avoid accidental modal close while selecting. If continuing to use the shadcn ScrollArea component, verify the component's usage instructions before implementing."
         }
       ]
     }

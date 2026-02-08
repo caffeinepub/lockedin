@@ -2,14 +2,11 @@ import Map "mo:core/Map";
 import List "mo:core/List";
 import Array "mo:core/Array";
 import Runtime "mo:core/Runtime";
-import Principal "mo:core/Principal";
 import Time "mo:core/Time";
+import Principal "mo:core/Principal";
 import Iter "mo:core/Iter";
-
-
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
-
 
 actor {
   let accessControlState = AccessControl.initState();
@@ -690,5 +687,44 @@ actor {
       case (null) { null };
       case (?goal) { ?goal.durationDays };
     };
+  };
+
+  public shared ({ caller }) func createGoalWithProgress(
+    description : Text,
+    timeFrame : TimeFrame.Type,
+    motivation : Text,
+    milestones : [Milestone],
+    weeklyTasks : [Task],
+    dailyTasks : [Task]
+  ) : async Nat {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can create goals with progress");
+    };
+
+    let goalId = nextGoalId;
+    nextGoalId += 1;
+
+    let newGoal : Goal = {
+      id = goalId;
+      description;
+      timeFrame;
+      motivation;
+      durationDays = 0;
+      lockedIn = false;
+      createdAt = getCurrentTimestamp();
+    };
+
+    let newGoalProgress : GoalProgress = {
+      milestones;
+      weeklyTasks;
+      dailyTasks;
+    };
+
+    let userGoals = getUserGoals(caller);
+    userGoals.goals.add(goalId, newGoal);
+    userGoals.goalProgress.add(goalId, newGoalProgress);
+    userData.add(caller, userGoals);
+
+    goalId;
   };
 };

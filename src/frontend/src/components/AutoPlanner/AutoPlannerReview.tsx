@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -50,6 +50,14 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
   const lockInGoal = useLockInGoal();
 
   const [isSaving, setIsSaving] = useState(false);
+  const [actorReady, setActorReady] = useState(false);
+
+  // Track when actor becomes ready
+  useEffect(() => {
+    if (actor && !actorInitializing) {
+      setActorReady(true);
+    }
+  }, [actor, actorInitializing]);
 
   const handleSave = async () => {
     if (!actor) {
@@ -57,9 +65,8 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
       return;
     }
 
-    // Runtime check for createGoalWithCustomDuration method
-    if (plan.durationDays !== undefined && typeof actor.createGoalWithCustomDuration !== 'function') {
-      toast.error('Custom duration feature is not available. Please try again or contact support.');
+    if (!editedGoal.trim()) {
+      toast.error('Please enter a goal description.');
       return;
     }
 
@@ -69,7 +76,7 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
       // Step 1: Create goal with or without custom duration
       let goalId: bigint;
       try {
-        if (plan.durationDays !== undefined) {
+        if (plan.durationDays !== undefined && typeof actor.createGoalWithCustomDuration === 'function') {
           goalId = await createGoalWithCustomDuration.mutateAsync({
             description: editedGoal,
             timeFrame: plan.timeFrame,
@@ -77,6 +84,9 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
             durationDays: plan.durationDays,
           });
         } else {
+          if (plan.durationDays !== undefined) {
+            toast.info('Using standard timeframe (custom duration not available).');
+          }
           goalId = await createGoal.mutateAsync({
             description: editedGoal,
             timeFrame: plan.timeFrame,
@@ -87,27 +97,7 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
         throw new Error(`Goal creation failed: ${getErrorMessage(error)}`);
       }
 
-      // Step 2: Verify the goal was created successfully
-      try {
-        const createdGoal = await actor.getGoal(goalId);
-        if (!createdGoal) {
-          throw new Error('Goal was not created successfully');
-        }
-
-        // If custom duration was used, verify it was persisted correctly
-        if (plan.durationDays !== undefined) {
-          const persistedDuration = Number(createdGoal.durationDays);
-          if (persistedDuration !== plan.durationDays) {
-            throw new Error(
-              `Goal duration mismatch: expected ${plan.durationDays} days, got ${persistedDuration} days`
-            );
-          }
-        }
-      } catch (verifyError) {
-        throw new Error(`Goal verification failed: ${getErrorMessage(verifyError)}`);
-      }
-
-      // Step 3: Add milestones with due dates
+      // Step 2: Add milestones with due dates
       const milestonesToAdd: Milestone[] = editedMilestones
         .filter((m) => m.desc.trim())
         .map((m) => ({
@@ -123,7 +113,7 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
         }
       }
 
-      // Step 4: Add weekly tasks
+      // Step 3: Add weekly tasks
       const weeklyTasksToAdd: Task[] = editedWeeklyTasks
         .filter((t) => t.trim())
         .map((desc) => ({
@@ -140,7 +130,7 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
         }
       }
 
-      // Step 5: Add daily tasks
+      // Step 4: Add daily tasks
       const dailyTasksToAdd: Task[] = editedDailyTasks
         .filter((t) => t.trim())
         .map((desc) => ({
@@ -157,14 +147,14 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
         }
       }
 
-      // Step 6: Lock in the goal
+      // Step 5: Lock in the goal
       try {
         await lockInGoal.mutateAsync(goalId);
       } catch (error) {
         throw new Error(`Locking in goal failed: ${getErrorMessage(error)}`);
       }
 
-      // Step 7: Refresh cache to ensure new goal appears
+      // Step 6: Refresh cache to ensure new goal appears
       await queryClient.invalidateQueries({ queryKey: ['goals'] });
       await queryClient.invalidateQueries({ queryKey: ['goal', goalId.toString()] });
 
@@ -175,7 +165,6 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
       const errorMsg = getErrorMessage(error, 'Failed to save plan');
       toast.error(errorMsg);
     } finally {
-      // Always reset saving state
       setIsSaving(false);
     }
   };
@@ -189,8 +178,7 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
 
   // Compute button state
   const isGoalEmpty = !editedGoal.trim();
-  const isActorNotReady = !actor || actorInitializing;
-  const isButtonDisabled = isSaving || isGoalEmpty || isActorNotReady;
+  const isButtonDisabled = isSaving || isGoalEmpty || !actorReady;
 
   // Determine button text and status message
   let buttonText = 'Save & Lock In';
@@ -198,12 +186,9 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
 
   if (isSaving) {
     buttonText = 'Saving...';
-  } else if (actorInitializing) {
+  } else if (!actorReady) {
     buttonText = 'Connecting...';
     statusMessage = 'Connecting to backend...';
-  } else if (!actor) {
-    buttonText = 'Connecting...';
-    statusMessage = 'Waiting for backend connection...';
   } else if (isGoalEmpty) {
     statusMessage = 'Enter a goal description to enable saving.';
   }
@@ -398,9 +383,7 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
         {/* Status Message */}
         {statusMessage && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            {(actorInitializing || (!actor && !isSaving)) && (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            )}
+            {!actorReady && <Loader2 className="h-4 w-4 animate-spin" />}
             <span>{statusMessage}</span>
           </div>
         )}
@@ -421,7 +404,7 @@ export default function AutoPlannerReview({ plan, onBack, onSaveComplete }: Auto
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 Saving...
               </>
-            ) : (actorInitializing || !actor) ? (
+            ) : !actorReady ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 Connecting...

@@ -62,11 +62,8 @@ export function useGetGoals() {
     queryKey: ['goals'],
     queryFn: async () => {
       if (!actor) return [];
-      try {
-        return await actor.getGoals();
-      } catch (error) {
-        return [];
-      }
+      const goals = await actor.getGoals();
+      return goals;
     },
     enabled: !!actor && !actorFetching,
     retry: false,
@@ -80,11 +77,7 @@ export function useGetGoal(goalId: bigint) {
     queryKey: ['goal', goalId.toString()],
     queryFn: async () => {
       if (!actor) return null;
-      try {
-        return await actor.getGoal(goalId);
-      } catch (error) {
-        return null;
-      }
+      return await actor.getGoal(goalId);
     },
     enabled: !!actor && !actorFetching,
     retry: false,
@@ -188,7 +181,7 @@ export function useCreateGoalFromTemplate() {
       queryClient.invalidateQueries({ queryKey: ['goals'] });
     },
     onError: (error: unknown) => {
-      toast.error(`Failed to create goal: ${getErrorMessage(error)}`);
+      throw error;
     },
   });
 }
@@ -228,11 +221,7 @@ export function useGetMilestones(goalId: bigint) {
     queryKey: ['milestones', goalId.toString()],
     queryFn: async () => {
       if (!actor) return [];
-      try {
-        return await actor.getMilestones(goalId);
-      } catch (error) {
-        return [];
-      }
+      return await actor.getMilestones(goalId);
     },
     enabled: !!actor && !actorFetching,
   });
@@ -265,11 +254,7 @@ export function useGetWeeklyTasks(goalId: bigint) {
     queryKey: ['weeklyTasks', goalId.toString()],
     queryFn: async () => {
       if (!actor) return [];
-      try {
-        return await actor.getWeeklyTasks(goalId);
-      } catch (error) {
-        return [];
-      }
+      return await actor.getWeeklyTasks(goalId);
     },
     enabled: !!actor && !actorFetching,
   });
@@ -302,11 +287,7 @@ export function useGetDailyTasks(goalId: bigint) {
     queryKey: ['dailyTasks', goalId.toString()],
     queryFn: async () => {
       if (!actor) return [];
-      try {
-        return await actor.getDailyTasks(goalId);
-      } catch (error) {
-        return [];
-      }
+      return await actor.getDailyTasks(goalId);
     },
     enabled: !!actor && !actorFetching,
   });
@@ -339,11 +320,7 @@ export function useIsGoalLockedIn(goalId: bigint) {
     queryKey: ['goalLockedIn', goalId.toString()],
     queryFn: async () => {
       if (!actor) return false;
-      try {
-        return await actor.isGoalLockedIn(goalId);
-      } catch (error) {
-        return false;
-      }
+      return await actor.isGoalLockedIn(goalId);
     },
     enabled: !!actor && !actorFetching,
   });
@@ -400,15 +377,11 @@ export function useGetDailyCheckIns() {
     queryKey: ['dailyCheckIns'],
     queryFn: async () => {
       if (!actor) return [];
-      try {
-        const result = await actor.getDailyCheckIns();
-        // Transform from Array<[goalId, Array<[dayKey, DailyCheckIn]>]> to flat DailyCheckIn[]
-        return result.flatMap(([_, checkInTuples]) => 
-          checkInTuples.map(([__, checkIn]) => checkIn)
-        );
-      } catch (error) {
-        return [];
-      }
+      const result = await actor.getDailyCheckIns();
+      // Transform from Array<[goalId, Array<[dayKey, DailyCheckIn]>]> to flat DailyCheckIn[]
+      return result.flatMap(([_, checkInTuples]) => 
+        checkInTuples.map(([__, checkIn]) => checkIn)
+      );
     },
     enabled: !!actor && !actorFetching,
   });
@@ -421,13 +394,9 @@ export function useGetDailyCheckInsByGoal(goalId: bigint) {
     queryKey: ['dailyCheckIns', goalId.toString()],
     queryFn: async () => {
       if (!actor) return [];
-      try {
-        const result = await actor.getDailyCheckInsByGoal(goalId);
-        // Transform from Array<[dayKey, DailyCheckIn]> to DailyCheckIn[]
-        return result.map(([_, checkIn]) => checkIn);
-      } catch (error) {
-        return [];
-      }
+      const result = await actor.getDailyCheckInsByGoal(goalId);
+      // Transform from Array<[dayKey, DailyCheckIn]> to DailyCheckIn[]
+      return result.map(([_, checkIn]) => checkIn);
     },
     enabled: !!actor && !actorFetching,
   });
@@ -478,11 +447,7 @@ export function useGetWeeklyReviews() {
     queryKey: ['weeklyReviews'],
     queryFn: async () => {
       if (!actor) return [];
-      try {
-        return await actor.getWeeklyReviews();
-      } catch (error) {
-        return [];
-      }
+      return await actor.getWeeklyReviews();
     },
     enabled: !!actor && !actorFetching,
   });
@@ -495,11 +460,7 @@ export function useGetWeeklyReviewsByGoal(goalId: bigint) {
     queryKey: ['weeklyReviews', goalId.toString()],
     queryFn: async () => {
       if (!actor) return [];
-      try {
-        return await actor.getWeeklyReviewsByGoal(goalId);
-      } catch (error) {
-        return [];
-      }
+      return await actor.getWeeklyReviewsByGoal(goalId);
     },
     enabled: !!actor && !actorFetching,
   });

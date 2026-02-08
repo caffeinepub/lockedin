@@ -1,24 +1,24 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-07T08:02:24.697Z",
-  "summary": "Locked-in Goals cards were updated to place a smaller \"Check in\" button on the same row as the stats, with the ticker remaining above. However, the requested refactor to avoid duplicating stats logic was not fully achieved: stats computation and data fetching are duplicated between the ticker and the new stats component.",
+  "generatedAt": "2026-02-08T17:49:08.749Z",
+  "summary": "Diff shows edits to GoalLibraryModal.tsx and adds an import for ScrollArea plus some modal close-handling logic, but the truncated diff does not provide enough evidence that the goal list region is actually made scrollable with a fixed header/footer and prevented background/page scrolling as required.",
   "missing_requirements": [
     {
-      "id": "REQ-2",
-      "requirement": "Refactor the CheckInTicker component rendering so that the stats block can be positioned in the same row as the \"Check in\" button within the Locked-in Goals card without duplicating stats logic.",
-      "reason": "The diff introduces a separate `CheckInStats` component, but it repeats the same data fetching (`useGetDailyCheckInsByGoal`, `useGetGoal`) and recomputes stats (`computeCheckInStats`) independently from `CheckInTicker`, which still performs its own fetch+compute for rendering the ticker bars. This duplicates stats logic rather than refactoring it into a shared structure.",
+      "id": "REQ-1",
+      "requirement": "Make the GoalLibraryModal goal template list actually scrollable (mouse wheel/trackpad + touch), with only the list region scrolling while modal header/tabs and footer actions remain visible; prevent background/page scroll; allow selecting any goal without unintended modal close.",
+      "reason": "Although ScrollArea is imported and there is some open/close handling, the provided diff is truncated before showing the modal layout structure (DialogContent / TabsContent / list container) and does not show any concrete max-height/overflow/ScrollArea wrapping that would ensure only the list scrolls while header/footer remain fixed, nor any explicit prevention of background scroll.",
       "evidence": [
-        "frontend/src/components/lockedIn/CheckInTicker.tsx"
+        "frontend/src/components/GoalLibraryModal.tsx (truncated; shows `import { ScrollArea } from '@/components/ui/scroll-area';` but not its usage or layout)",
+        "frontend/src/components/GoalLibraryModal.tsx (truncated; modal scroll containment / fixed header-footer not shown)"
       ]
     }
   ],
   "hallucinated_features": [],
-  "confidence": 0.74,
+  "confidence": 0.46,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/components/lockedIn/CheckInTicker.tsx",
-    "frontend/src/components/lockedIn/LockedInGoalsSection.tsx",
+    "frontend/src/components/GoalLibraryModal.tsx",
     "project_state.json"
   ]
 }

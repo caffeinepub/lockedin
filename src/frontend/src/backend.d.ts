@@ -84,6 +84,7 @@ export interface backendInterface {
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     createGoal(description: string, timeFrame: Type__1, motivation: string): Promise<bigint>;
     createGoalWithCustomDuration(description: string, timeFrame: Type__1, motivation: string, durationDays: bigint): Promise<bigint>;
+    createGoalWithProgress(description: string, timeFrame: Type__1, motivation: string, milestones: Array<Milestone>, weeklyTasks: Array<Task>, dailyTasks: Array<Task>): Promise<bigint>;
     deleteGoal(goalId: bigint): Promise<void>;
     getAllUserData(): Promise<Array<[Principal, UserDataView]>>;
     getAllUserGoals(): Promise<Array<[Principal, Array<Goal>]>>;

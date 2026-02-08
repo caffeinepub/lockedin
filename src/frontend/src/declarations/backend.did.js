@@ -93,6 +93,18 @@ export const idlService = IDL.Service({
       [IDL.Nat],
       [],
     ),
+  'createGoalWithProgress' : IDL.Func(
+      [
+        IDL.Text,
+        Type__1,
+        IDL.Text,
+        IDL.Vec(Milestone),
+        IDL.Vec(Task),
+        IDL.Vec(Task),
+      ],
+      [IDL.Nat],
+      [],
+    ),
   'deleteGoal' : IDL.Func([IDL.Nat], [], []),
   'getAllUserData' : IDL.Func(
       [],
@@ -249,6 +261,18 @@ export const idlFactory = ({ IDL }) => {
     'createGoal' : IDL.Func([IDL.Text, Type__1, IDL.Text], [IDL.Nat], []),
     'createGoalWithCustomDuration' : IDL.Func(
         [IDL.Text, Type__1, IDL.Text, IDL.Nat],
+        [IDL.Nat],
+        [],
+      ),
+    'createGoalWithProgress' : IDL.Func(
+        [
+          IDL.Text,
+          Type__1,
+          IDL.Text,
+          IDL.Vec(Milestone),
+          IDL.Vec(Task),
+          IDL.Vec(Task),
+        ],
         [IDL.Nat],
         [],
       ),

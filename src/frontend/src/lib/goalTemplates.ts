@@ -88,6 +88,54 @@ export const GOAL_TEMPLATES: GoalTemplate[] = [
       { desc: 'Review flashcards', isComplete: false, category: undefined },
     ],
   },
+  {
+    id: 'data-science',
+    category: 'study',
+    title: 'Learn Data Science',
+    description: 'Master data analysis, statistics, and machine learning fundamentals',
+    motivation: 'Break into the high-demand field of data science',
+    timeFrame: Type__1.months6to12,
+    timeFrameLabel: '6-12 Months',
+    milestones: [
+      { desc: 'Complete Python for data science course', dueDate: undefined },
+      { desc: 'Master statistics and probability', dueDate: undefined },
+      { desc: 'Build 3 data analysis projects', dueDate: undefined },
+      { desc: 'Complete machine learning course', dueDate: undefined },
+    ],
+    weeklyTasks: [
+      { desc: 'Complete 2 course modules', isComplete: false, category: undefined },
+      { desc: 'Work on data project', isComplete: false, category: undefined },
+      { desc: 'Practice SQL queries', isComplete: false, category: undefined },
+    ],
+    dailyTasks: [
+      { desc: 'Study for 1.5 hours', isComplete: false, category: undefined },
+      { desc: 'Practice coding problems', isComplete: false, category: undefined },
+    ],
+  },
+  {
+    id: 'public-speaking',
+    category: 'study',
+    title: 'Master Public Speaking',
+    description: 'Overcome fear and become a confident public speaker',
+    motivation: 'Advance my career and communicate ideas effectively',
+    timeFrame: Type__1.days90,
+    timeFrameLabel: '90 Days',
+    milestones: [
+      { desc: 'Give first 5-minute speech', dueDate: undefined },
+      { desc: 'Present to small group (10 people)', dueDate: undefined },
+      { desc: 'Deliver 15-minute presentation', dueDate: undefined },
+      { desc: 'Speak at public event', dueDate: undefined },
+    ],
+    weeklyTasks: [
+      { desc: 'Practice speech delivery 3 times', isComplete: false, category: undefined },
+      { desc: 'Record and review presentation', isComplete: false, category: undefined },
+      { desc: 'Attend speaking club meeting', isComplete: false, category: undefined },
+    ],
+    dailyTasks: [
+      { desc: 'Practice vocal exercises (10 min)', isComplete: false, category: undefined },
+      { desc: 'Read aloud for clarity', isComplete: false, category: undefined },
+    ],
+  },
 
   // Fitness Goals
   {
@@ -160,6 +208,54 @@ export const GOAL_TEMPLATES: GoalTemplate[] = [
     dailyTasks: [
       { desc: 'Morning yoga routine (15 min)', isComplete: false, category: undefined },
       { desc: 'Evening stretching (10 min)', isComplete: false, category: undefined },
+    ],
+  },
+  {
+    id: 'lose-weight',
+    category: 'fitness',
+    title: 'Lose Weight Sustainably',
+    description: 'Achieve healthy weight loss through diet and exercise',
+    motivation: 'Improve my health, energy, and confidence',
+    timeFrame: Type__1.months6to12,
+    timeFrameLabel: '6-12 Months',
+    milestones: [
+      { desc: 'Lose first 5 pounds', dueDate: undefined },
+      { desc: 'Reach 10 pounds lost', dueDate: undefined },
+      { desc: 'Hit 20 pounds lost', dueDate: undefined },
+      { desc: 'Achieve target weight', dueDate: undefined },
+    ],
+    weeklyTasks: [
+      { desc: 'Exercise 4-5 times', isComplete: false, category: undefined },
+      { desc: 'Meal prep for the week', isComplete: false, category: undefined },
+      { desc: 'Track weight and measurements', isComplete: false, category: undefined },
+    ],
+    dailyTasks: [
+      { desc: 'Stay in calorie deficit', isComplete: false, category: undefined },
+      { desc: 'Drink 8 glasses of water', isComplete: false, category: undefined },
+    ],
+  },
+  {
+    id: 'marathon-training',
+    category: 'fitness',
+    title: 'Train for a Marathon',
+    description: 'Complete a full marathon (26.2 miles)',
+    motivation: 'Achieve a major fitness milestone and prove my dedication',
+    timeFrame: Type__1.months6to12,
+    timeFrameLabel: '6-12 Months',
+    milestones: [
+      { desc: 'Run 10 miles continuously', dueDate: undefined },
+      { desc: 'Complete half marathon', dueDate: undefined },
+      { desc: 'Run 20 miles in training', dueDate: undefined },
+      { desc: 'Finish full marathon', dueDate: undefined },
+    ],
+    weeklyTasks: [
+      { desc: 'Complete 4 running sessions', isComplete: false, category: undefined },
+      { desc: 'Do cross-training twice', isComplete: false, category: undefined },
+      { desc: 'Long run on weekend', isComplete: false, category: undefined },
+    ],
+    dailyTasks: [
+      { desc: 'Stretch and foam roll', isComplete: false, category: undefined },
+      { desc: 'Eat balanced meals', isComplete: false, category: undefined },
     ],
   },
 
@@ -236,6 +332,54 @@ export const GOAL_TEMPLATES: GoalTemplate[] = [
       { desc: 'Time-block calendar', isComplete: false, category: undefined },
     ],
   },
+  {
+    id: 'read-books',
+    category: 'productivity',
+    title: 'Read 52 Books in a Year',
+    description: 'Develop a consistent reading habit and read one book per week',
+    motivation: 'Expand my knowledge and become a lifelong learner',
+    timeFrame: Type__1.years1to5,
+    timeFrameLabel: '1 Year',
+    milestones: [
+      { desc: 'Read 13 books (Quarter 1)', dueDate: undefined },
+      { desc: 'Read 26 books (Half year)', dueDate: undefined },
+      { desc: 'Read 39 books (Three quarters)', dueDate: undefined },
+      { desc: 'Complete 52 books', dueDate: undefined },
+    ],
+    weeklyTasks: [
+      { desc: 'Finish one book', isComplete: false, category: undefined },
+      { desc: 'Write book summary/notes', isComplete: false, category: undefined },
+      { desc: 'Choose next book', isComplete: false, category: undefined },
+    ],
+    dailyTasks: [
+      { desc: 'Read for 30 minutes', isComplete: false, category: undefined },
+      { desc: 'Take notes on key insights', isComplete: false, category: undefined },
+    ],
+  },
+  {
+    id: 'digital-detox',
+    category: 'productivity',
+    title: 'Complete Digital Detox',
+    description: 'Reduce screen time and reclaim focus from digital distractions',
+    motivation: 'Improve mental clarity and be more present in life',
+    timeFrame: Type__1.days30,
+    timeFrameLabel: '30 Days',
+    milestones: [
+      { desc: 'Reduce screen time by 25%', dueDate: undefined },
+      { desc: 'Reduce screen time by 50%', dueDate: undefined },
+      { desc: 'Establish phone-free zones', dueDate: undefined },
+      { desc: 'Maintain healthy digital habits', dueDate: undefined },
+    ],
+    weeklyTasks: [
+      { desc: 'Track daily screen time', isComplete: false, category: undefined },
+      { desc: 'Delete 3 time-wasting apps', isComplete: false, category: undefined },
+      { desc: 'Plan offline activities', isComplete: false, category: undefined },
+    ],
+    dailyTasks: [
+      { desc: 'No phone first hour after waking', isComplete: false, category: undefined },
+      { desc: 'No screens 1 hour before bed', isComplete: false, category: undefined },
+    ],
+  },
 
   // Money Goals
   {
@@ -310,6 +454,54 @@ export const GOAL_TEMPLATES: GoalTemplate[] = [
       { desc: 'Track net worth', isComplete: false, category: undefined },
     ],
   },
+  {
+    id: 'pay-off-debt',
+    category: 'money',
+    title: 'Pay Off Debt',
+    description: 'Eliminate credit card and consumer debt',
+    motivation: 'Achieve financial freedom and reduce stress',
+    timeFrame: Type__1.months6to12,
+    timeFrameLabel: '6-12 Months',
+    milestones: [
+      { desc: 'List all debts and create plan', dueDate: undefined },
+      { desc: 'Pay off smallest debt', dueDate: undefined },
+      { desc: 'Eliminate 50% of total debt', dueDate: undefined },
+      { desc: 'Become debt-free', dueDate: undefined },
+    ],
+    weeklyTasks: [
+      { desc: 'Make extra debt payment', isComplete: false, category: undefined },
+      { desc: 'Find ways to increase income', isComplete: false, category: undefined },
+      { desc: 'Track debt payoff progress', isComplete: false, category: undefined },
+    ],
+    dailyTasks: [
+      { desc: 'Avoid new debt', isComplete: false, category: undefined },
+      { desc: 'Pack lunch to save money', isComplete: false, category: undefined },
+    ],
+  },
+  {
+    id: 'increase-income',
+    category: 'money',
+    title: 'Increase Income by 20%',
+    description: 'Boost your earning potential through raises, promotions, or new opportunities',
+    motivation: 'Improve my financial situation and quality of life',
+    timeFrame: Type__1.months6to12,
+    timeFrameLabel: '6-12 Months',
+    milestones: [
+      { desc: 'Identify income growth opportunities', dueDate: undefined },
+      { desc: 'Develop new valuable skills', dueDate: undefined },
+      { desc: 'Negotiate raise or find better job', dueDate: undefined },
+      { desc: 'Achieve 20% income increase', dueDate: undefined },
+    ],
+    weeklyTasks: [
+      { desc: 'Work on skill development', isComplete: false, category: undefined },
+      { desc: 'Network with professionals', isComplete: false, category: undefined },
+      { desc: 'Apply to higher-paying positions', isComplete: false, category: undefined },
+    ],
+    dailyTasks: [
+      { desc: 'Learn something new for career', isComplete: false, category: undefined },
+      { desc: 'Document achievements', isComplete: false, category: undefined },
+    ],
+  },
 
   // Mental Health Goals
   {
@@ -382,6 +574,54 @@ export const GOAL_TEMPLATES: GoalTemplate[] = [
     dailyTasks: [
       { desc: 'Deep breathing exercises (5 min)', isComplete: false, category: undefined },
       { desc: 'Take breaks throughout day', isComplete: false, category: undefined },
+    ],
+  },
+  {
+    id: 'improve-sleep',
+    category: 'mentalHealth',
+    title: 'Improve Sleep Quality',
+    description: 'Establish healthy sleep habits for better rest and recovery',
+    motivation: 'Boost energy, mood, and overall health',
+    timeFrame: Type__1.days90,
+    timeFrameLabel: '90 Days',
+    milestones: [
+      { desc: 'Establish consistent sleep schedule', dueDate: undefined },
+      { desc: 'Sleep 7+ hours for 14 days straight', dueDate: undefined },
+      { desc: 'Optimize sleep environment', dueDate: undefined },
+      { desc: 'Maintain healthy sleep for 90 days', dueDate: undefined },
+    ],
+    weeklyTasks: [
+      { desc: 'Track sleep quality', isComplete: false, category: undefined },
+      { desc: 'Adjust bedtime routine', isComplete: false, category: undefined },
+      { desc: 'Limit caffeine after 2pm', isComplete: false, category: undefined },
+    ],
+    dailyTasks: [
+      { desc: 'Go to bed at same time', isComplete: false, category: undefined },
+      { desc: 'No screens 1 hour before bed', isComplete: false, category: undefined },
+    ],
+  },
+  {
+    id: 'journaling-habit',
+    category: 'mentalHealth',
+    title: 'Build Daily Journaling Habit',
+    description: 'Develop a consistent journaling practice for self-reflection',
+    motivation: 'Process emotions, track growth, and gain clarity',
+    timeFrame: Type__1.days90,
+    timeFrameLabel: '90 Days',
+    milestones: [
+      { desc: 'Journal for 7 consecutive days', dueDate: undefined },
+      { desc: 'Reach 30-day journaling streak', dueDate: undefined },
+      { desc: 'Fill first journal notebook', dueDate: undefined },
+      { desc: 'Complete 90 days of journaling', dueDate: undefined },
+    ],
+    weeklyTasks: [
+      { desc: 'Journal daily', isComplete: false, category: undefined },
+      { desc: 'Review past entries', isComplete: false, category: undefined },
+      { desc: 'Try new journaling prompts', isComplete: false, category: undefined },
+    ],
+    dailyTasks: [
+      { desc: 'Morning pages (10 min)', isComplete: false, category: undefined },
+      { desc: 'Evening reflection', isComplete: false, category: undefined },
     ],
   },
 ];
